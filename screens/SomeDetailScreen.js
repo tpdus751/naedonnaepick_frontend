@@ -14,7 +14,7 @@ export default function SomeDetailScreen() {
   return (
     <Container>
     <Header 
-    title="내돈내픽"  
+    title="내돈내픽 zz"  
         canGoBack={true}
         onBackPress={() => navigation.goBack()}
         onMenuPress={() => Alert.alert('메뉴 버튼 클릭')}
