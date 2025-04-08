@@ -19,7 +19,7 @@ export default function HomeScreen() {
       {/* 상단 이미지 + 설명 */}
       <Banner source={{ uri: 'https://cdn.gimhaenews.co.kr/news/photo/201501/11563_17242_3954.jpg' }} />
       <Description>
-        가격대와 선호 항목을 설정하고{'\n'}나에게 맞는 음식점을 추천 받아보세요..
+        가격대와 선호 항목을 설정하고{'\n'}나에게 맞는 음식점을 추천 받아보세요....
       </Description>
 
       {/* 버튼 3개 */}
