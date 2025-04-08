@@ -1,11 +1,14 @@
 // screens/HomeScreen.js
-import React from 'react';
+import React, { useState } from 'react';
 import { SafeAreaView, Image, Alert } from 'react-native';
 import styled from 'styled-components/native';
 import Header from '../components/Header';
-import { useNavigation } from '@react-navigation/native'; // ✅ 1
+import { useNavigation } from '@react-navigation/native'; 
+import SideMenuDrawer from '../components/SideMenuDrawer';
 
 export default function HomeScreen() {
+  const [isMenuVisible, setMenuVisible] = useState(false);
+
   const navigation = useNavigation(); 
 
   return (
@@ -14,8 +17,18 @@ export default function HomeScreen() {
         title="내돈내픽"  
         canGoBack={false}
         onBackPress={() => Alert.alert('뒤로가기 버튼 클릭')}
-        onMenuPress={() => Alert.alert('메뉴 버튼 클릭')}
+        onMenuPress={() => setMenuVisible(true)}
       /> 
+
+      <SideMenuDrawer
+        isVisible={isMenuVisible}
+        onClose={() => setMenuVisible(false)}
+        onLoginPress={() => {
+          setMenuVisible(false);
+          {/* navigation.navigate('LoginMain'); */}
+        }}
+      />
+
       {/* 상단 이미지 + 설명 */}
       <Banner source={{ uri: 'https://cdn.gimhaenews.co.kr/news/photo/201501/11563_17242_3954.jpg' }} />
       <Description>
