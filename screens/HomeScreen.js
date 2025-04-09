@@ -25,8 +25,14 @@ export default function HomeScreen() {
         onClose={() => setMenuVisible(false)}
         onLoginPress={() => {
           setMenuVisible(false);
-          navigation.navigate('LoginMain');
+          {/*navigation.navigate('Login');*/}
+          Alert.alert('로그인 버튼 클릭');
         }}
+        onSignUpPress={() => {
+          setMenuVisible(false);
+          Alert.alert('회원가입 버튼 클릭');
+          {/*navigation.navigate('Login');*/}
+      }}
         
       />
 

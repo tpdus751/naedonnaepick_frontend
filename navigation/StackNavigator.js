@@ -16,7 +16,10 @@ export default function StackNavigator() {
 
       {/* 추가로 Stack 화면을 연결하고 싶을 때 */}
       <Stack.Screen name="Detail" component={SomeDetailScreen} />
-      {/* <Stack.Screen name="LoginMain" component={LoginMainScreen} /> */}
+
+      {/*<Stack.Screen name="Login" component={LoginScreen} />
+      <Stack.Screen name="SignUp" component={SignUpScreen} /> */}
+
     </Stack.Navigator>
   );
 }

@@ -26,8 +26,8 @@ export default function SideMenuDrawer({ isVisible, onClose, onLoginPress, onSig
         <MenuItem onPress={onLoginPress}>
           <MenuText>로그인</MenuText>
         </MenuItem>
-        <MenuItem>
-            <MenuText>설정</MenuText>
+        <MenuItem onPress={onSignUpPress}>
+          <MenuText>회원가입</MenuText>
         </MenuItem>
         </ContentWrapper>
       </DrawerContainer>
