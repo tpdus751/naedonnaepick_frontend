@@ -25,8 +25,9 @@ export default function HomeScreen() {
         onClose={() => setMenuVisible(false)}
         onLoginPress={() => {
           setMenuVisible(false);
-          {/* navigation.navigate('LoginMain'); */}
+          navigation.navigate('LoginMain');
         }}
+        
       />
 
       {/* 상단 이미지 + 설명 */}

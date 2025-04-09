@@ -6,7 +6,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 const screenWidth = Dimensions.get('window').width;
 
-export default function SideMenuDrawer({ isVisible, onClose, onLoginPress }) {
+export default function SideMenuDrawer({ isVisible, onClose, onLoginPress, onSignUpPress }) {
   const slideAnim = useRef(new Animated.Value(screenWidth)).current;
 
   useEffect(() => {
