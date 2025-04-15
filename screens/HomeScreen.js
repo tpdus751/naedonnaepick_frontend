@@ -23,10 +23,10 @@ export default function HomeScreen() {
       <SideMenuDrawer
         isVisible={isMenuVisible}
         onClose={() => setMenuVisible(false)}
-        onLoginPress={() => {
-          setMenuVisible(false);
-          {/* navigation.navigate('LoginMain'); */}
-        }}
+        onLoginPress={() => 
+          alert()
+          /* navigation.navigate('LoginMain'); */
+        }
       />
 
       {/* 상단 이미지 + 설명 */}
@@ -38,7 +38,7 @@ export default function HomeScreen() {
       {/* 버튼 3개 */}
       <ButtonContainer>
         <MainButton onPress={() => navigation.navigate('Detail')}>
-          <ButtonText>음식점 검색</ButtonText>
+          <ButtonText>음식점 검색123</ButtonText>
         </MainButton>
         <MainButton onPress={() => navigation.navigate('Detail')}>
           <ButtonText>예산 관리</ButtonText>
