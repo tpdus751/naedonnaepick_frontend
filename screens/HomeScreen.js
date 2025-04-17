@@ -24,7 +24,7 @@ export default function HomeScreen() {
 
       {/* 버튼 3개 */}
       <ButtonContainer>
-        <MainButton onPress={() => navigation.navigate('Detail')}>
+        <MainButton onPress={() => navigation.navigate('restaurant')}>
           <ButtonText>음식점 검색</ButtonText>
         </MainButton>
         <MainButton onPress={() => navigation.navigate('Detail')}>

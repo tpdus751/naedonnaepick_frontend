@@ -5,6 +5,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import HomeScreen from '../screens/HomeScreen';
 import BudgetScreen from '../screens/BudgetScreen';
 import SearchScreen from '../screens/SearchScreen';
+import RecommendationScreen from '../screens/RecommendationScreen';
 import ChatScreen from '../screens/ChatScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import { Ionicons } from '@expo/vector-icons';
@@ -45,7 +46,7 @@ export default function BottomTabNavigator() {
       >
         <Tab.Screen name="홈" component={HomeScreen} />
         <Tab.Screen name="예산" component={BudgetScreen} />
-        <Tab.Screen name="음식점" component={SearchScreen} />
+        <Tab.Screen name="음식점" component={RecommendationScreen} />
         <Tab.Screen name="채팅" component={ChatScreen} />
         <Tab.Screen name="마이페이지" component={ProfileScreen} />
       </Tab.Navigator>
