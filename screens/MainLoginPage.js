@@ -35,14 +35,19 @@ export default function LoginScreen() {
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.socialButton}>
-        <Image source={require('../screens/naver-icon.png')} style={styles.icon} />
-        <Text style={styles.socialText}>네이버로 회원가입하기</Text>
+        <View style={styles.socialInner}>
+          <Image source={require('../screens/naver-icon.png')} style={styles.icon} />
+          <Text style={styles.socialText}>네이버로 로그인하기</Text>
+        </View>
       </TouchableOpacity>
 
       <TouchableOpacity style={[styles.socialButton, { backgroundColor: '#FAE100' }]}>
-        <Image source={require('../screens/kakao-icon.png')} style={styles.icon} />
-        <Text style={styles.socialText}>카카오로 회원가입하기</Text>
+        <View style={styles.socialInner}>
+          <Image source={require('../screens/kakao-icon.png')} style={styles.icon} />
+          <Text style={styles.socialText}>카카오로 로그인하기</Text>
+        </View>
       </TouchableOpacity>
+
     </View>
   );
 }
@@ -99,8 +104,6 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   socialButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
     backgroundColor: '#eee',
     padding: 15,
     borderRadius: 5,
@@ -113,5 +116,10 @@ const styles = StyleSheet.create({
   icon: {
     width: 24,
     height: 24,
+  },
+  socialInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center', // 가운데 정렬!
   },
 });

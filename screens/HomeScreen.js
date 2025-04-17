@@ -24,7 +24,7 @@ export default function HomeScreen() {
         isVisible={isMenuVisible}
         onClose={() => setMenuVisible(false)}
         onLoginPress={() => 
-          alert()
+          navigation.navigate('LoginMain')
           /* navigation.navigate('LoginMain'); */
         }
       />
@@ -38,7 +38,7 @@ export default function HomeScreen() {
       {/* 버튼 3개 */}
       <ButtonContainer>
         <MainButton onPress={() => navigation.navigate('Detail')}>
-          <ButtonText>음식점 검색123</ButtonText>
+          <ButtonText>음식점 검색</ButtonText>
         </MainButton>
         <MainButton onPress={() => navigation.navigate('Detail')}>
           <ButtonText>예산 관리</ButtonText>
