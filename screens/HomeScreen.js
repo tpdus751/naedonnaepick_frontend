@@ -23,10 +23,10 @@ export default function HomeScreen() {
       <SideMenuDrawer
         isVisible={isMenuVisible}
         onClose={() => setMenuVisible(false)}
-        onLoginPress={() => {
-          setMenuVisible(false);
-          {/* navigation.navigate('LoginMain'); */}
-        }}
+        onLoginPress={() => 
+          navigation.navigate('LoginMain')
+          /* navigation.navigate('LoginMain'); */
+        }
       />
 
       {/* 상단 이미지 + 설명 */}
