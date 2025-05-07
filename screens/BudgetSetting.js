@@ -16,6 +16,7 @@ export default function BudgetSettingScreen({ navigation }) {
   };
 
   return (
+    
     <View style={styles.container}>
       <Text style={styles.title}>예산정하기</Text>
       <View style={styles.dateRow}>
@@ -134,4 +135,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     letterSpacing: -0.5,
   },
+  
 });
