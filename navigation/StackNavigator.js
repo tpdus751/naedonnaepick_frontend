@@ -5,8 +5,8 @@ import BottomTabNavigator from './BottomTabNavigator';
 
 
 // 화면 컴포넌트 import
- import BudgetScreen from '../screens/BudgetScreen';
- import BudgetSetting from '../screens/BudgetSetting';
+import BudgetScreen from '../screens/BudgetScreen';
+import BudgetSetting from '../screens/BudgetSetting';
 import SomeDetailScreen from '../screens/SomeDetailScreen'; // 상세보기 화면 예시
 
 import LoginScreen from '../screens/MainLoginPage'; 
@@ -24,7 +24,7 @@ export default function StackNavigator() {
       <Stack.Screen name="Budget" component={BudgetScreen} />
       {/* 예산정하기(예산설정) 화면 */}
       <Stack.Screen name="BudgetSetting" component={BudgetSetting} />
-      {/* 상세보기 화면 */}
+      {/* 추가로 Stack 화면을 연결하고 싶을 때 */}
       <Stack.Screen name="Detail" component={SomeDetailScreen} />
 
       <Stack.Screen name="LoginMain" component={LoginScreen} />

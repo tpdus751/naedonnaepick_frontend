@@ -5,6 +5,7 @@ import Slider from '@react-native-community/slider';
 import Header from '../components/Header';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import SideMenuDrawer from '../components/SideMenuDrawer';
 
 export default function BudgetSettingScreen() {
   const navigation = useNavigation();
@@ -14,6 +15,8 @@ export default function BudgetSettingScreen() {
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [budget, setBudget] = useState(100000);
+
+  const [isMenuVisible, setMenuVisible] = useState(false);
 
   const formatDate = (date) => {
     return date.toISOString().slice(0, 10);
@@ -25,7 +28,17 @@ export default function BudgetSettingScreen() {
         title="내돈내픽"
         canGoBack={true}
         onBackPress={() => navigation.goBack()}
+        onMenuPress={() => setMenuVisible(true)}
       />
+
+      <SideMenuDrawer
+              isVisible={isMenuVisible}
+              onClose={() => setMenuVisible(false)}
+              onLoginPress={() => 
+                navigation.navigate('LoginMain')
+                /* navigation.navigate('LoginMain'); */
+              }
+            />
       <View style={styles.container}>
         <Text style={styles.title}>예산설정</Text>
         <View style={styles.dateRow}>
@@ -45,32 +58,37 @@ export default function BudgetSettingScreen() {
             mode="date"
             display="default"
             onChange={(event, selectedDate) => {
-              if (event.type === 'dismissed') {
-                setShowStartPicker(false);
-                return;
-              }
-              if (selectedDate) {
+              setShowStartPicker(false); // ✅ Picker 닫기
+              if (event.type === 'set' && selectedDate) {
                 setStartDate(selectedDate);
+                // 🔐 종료일이 앞서면 자동 조정
+                if (selectedDate > endDate) {
+                  setEndDate(selectedDate);
+                }
               }
             }}
           />
         )}
+
         {showEndPicker && (
           <DateTimePicker
             value={endDate}
             mode="date"
             display="default"
             onChange={(event, selectedDate) => {
-              if (event.type === 'dismissed') {
-                setShowEndPicker(false);
-                return;
-              }
-              if (selectedDate) {
-                setEndDate(selectedDate);
+              setShowEndPicker(false); // ✅ Picker 닫기
+              if (event.type === 'set' && selectedDate) {
+                // 🔐 시작일보다 이전이면 안 됨
+                if (selectedDate < startDate) {
+                  alert("종료일은 시작일보다 늦어야 합니다.");
+                } else {
+                  setEndDate(selectedDate);
+                }
               }
             }}
           />
         )}
+
 
         <View style={styles.sliderBox}>
           <Text style={styles.label}>예산설정</Text>
