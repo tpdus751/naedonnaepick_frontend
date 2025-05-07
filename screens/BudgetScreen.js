@@ -27,7 +27,8 @@ export default function BudgetScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.safe}>
       <View style={styles.container}>
-        <Text style={styles.title}>예산설정</Text>
+
+        <Text style={styles.title}>현재예산</Text>
         <Text style={styles.period}>
           시작일: {budgetInfo.startDate} ~ 종료일: {budgetInfo.endDate}
         </Text>
@@ -62,7 +63,7 @@ export default function BudgetScreen({ navigation }) {
             onPress={() => navigation.navigate('BudgetSetting')}
             activeOpacity={0.8}
           >
-            <Text style={styles.actionBtnText}>예산정하기</Text>
+            <Text style={styles.actionBtnText}>현재예산</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionBtn}
