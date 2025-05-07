@@ -1,98 +1,120 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Button, TextInput, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Slider from '@react-native-community/slider';
+import Header from '../components/Header';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { useNavigation } from '@react-navigation/native';
 
-export default function BudgetSettingScreen({ navigation }) {
+export default function BudgetSettingScreen() {
+  const navigation = useNavigation();
+
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [budget, setBudget] = useState(100000);
 
-  // 날짜 포맷 함수
   const formatDate = (date) => {
     return date.toISOString().slice(0, 10);
   };
 
   return (
-    
-    <View style={styles.container}>
-      <Text style={styles.title}>예산정하기</Text>
-      <View style={styles.dateRow}>
-        <Text style={styles.label}>시작일</Text>
-        <TouchableOpacity onPress={() => setShowStartPicker(true)}>
-          <Text style={styles.dateBtn}>{formatDate(startDate)}</Text>
-        </TouchableOpacity>
-        <Text style={styles.label}>종료일</Text>
-        <TouchableOpacity onPress={() => setShowEndPicker(true)}>
-          <Text style={styles.dateBtn}>{formatDate(endDate)}</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* 날짜 선택기 */}
-      {showStartPicker && (
-        <DateTimePicker
-          value={startDate}
-          mode="date"
-          display="default"
-          onChange={(event, selectedDate) => {
-            setShowStartPicker(Platform.OS === 'ios');
-            if (selectedDate) setStartDate(selectedDate);
-          }}
-        />
-      )}
-      {showEndPicker && (
-        <DateTimePicker
-          value={endDate}
-          mode="date"
-          display="default"
-          onChange={(event, selectedDate) => {
-            setShowEndPicker(Platform.OS === 'ios');
-            if (selectedDate) setEndDate(selectedDate);
-          }}
-        />
-      )}
-
-      {/* 예산 슬라이더 */}
-      <View style={styles.sliderBox}>
-        <Text style={styles.label}>예산설정</Text>
-        <Slider
-          style={{ width: '100%', height: 40 }}
-          minimumValue={0}
-          maximumValue={1000000}
-          step={1000}
-          value={budget}
-          onValueChange={setBudget}
-          minimumTrackTintColor="#22315b"
-          maximumTrackTintColor="#ccc"
-          thumbTintColor="#22315b"
-        />
-        <Text style={styles.budgetNum}>₩{budget.toLocaleString()}</Text>
-      </View>
-
-      {/* 직접 입력 */}
-      <TextInput
-        style={styles.input}
-        value={budget.toString()}
-        onChangeText={text => setBudget(Number(text.replace(/[^0-9]/g, '')))}
-        keyboardType="numeric"
-        placeholder="예산 입력"
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+      <Header
+        title="내돈내픽"
+        canGoBack={true}
+        onBackPress={() => navigation.goBack()}
       />
+      <View style={styles.container}>
+        <Text style={styles.title}>예산설정</Text>
+        <View style={styles.dateRow}>
+          <Text style={styles.label}>시작일</Text>
+          <TouchableOpacity onPress={() => setShowStartPicker(true)}>
+            <Text style={styles.dateBtn}>{formatDate(startDate)}</Text>
+          </TouchableOpacity>
+          <Text style={styles.label}>종료일</Text>
+          <TouchableOpacity onPress={() => setShowEndPicker(true)}>
+            <Text style={styles.dateBtn}>{formatDate(endDate)}</Text>
+          </TouchableOpacity>
+        </View>
 
-      <Text style={styles.notice}>
-        * 따로 설정하지 않으면 계속 이 가격으로 예산이 정해집니다.
-      </Text>
+        {showStartPicker && (
+          <DateTimePicker
+            value={startDate}
+            mode="date"
+            display="default"
+            onChange={(event, selectedDate) => {
+              if (event.type === 'dismissed') {
+                setShowStartPicker(false);
+                return;
+              }
+              if (selectedDate) {
+                setStartDate(selectedDate);
+              }
+            }}
+          />
+        )}
+        {showEndPicker && (
+          <DateTimePicker
+            value={endDate}
+            mode="date"
+            display="default"
+            onChange={(event, selectedDate) => {
+              if (event.type === 'dismissed') {
+                setShowEndPicker(false);
+                return;
+              }
+              if (selectedDate) {
+                setEndDate(selectedDate);
+              }
+            }}
+          />
+        )}
 
-      <TouchableOpacity style={styles.confirmBtn} onPress={() => navigation.goBack()}>
-        <Text style={styles.confirmBtnText}>확인</Text>
-      </TouchableOpacity>
-    </View>
+        <View style={styles.sliderBox}>
+          <Text style={styles.label}>예산설정</Text>
+          <Slider
+            style={{ width: '100%', height: 40 }}
+            minimumValue={0}
+            maximumValue={1000000}
+            step={1000}
+            value={budget}
+            onValueChange={setBudget}
+            minimumTrackTintColor="#22315b"
+            maximumTrackTintColor="#ccc"
+            thumbTintColor="#22315b"
+          />
+          <Text style={styles.budgetNum}>₩{budget.toLocaleString()}</Text>
+        </View>
+
+        <TextInput
+          style={styles.input}
+          value={budget.toString()}
+          onChangeText={text => setBudget(Number(text.replace(/[^0-9]/g, '')))}
+          keyboardType="numeric"
+          placeholder="예산 입력"
+        />
+
+        <Text style={styles.notice}>
+          * 따로 설정하지 않으면 계속 이 가격으로 예산이 정해집니다.
+        </Text>
+
+        <TouchableOpacity style={styles.confirmBtn} onPress={() => navigation.goBack()}>
+          <Text style={styles.confirmBtnText}>확인</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', padding: 24, paddingTop: 40 },
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    padding: 24,
+    paddingTop: 20,
+  },
   title: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 20, color: '#222' },
   dateRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 20, gap: 8 },
   label: { fontSize: 15, color: '#444', marginHorizontal: 4 },
@@ -135,5 +157,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     letterSpacing: -0.5,
   },
-  
 });
