@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, ScrollView, SafeAreaView } from 'react-native';
 import Header from '../components/Header'; // 헤더 컴포넌트 임포트
+import SideMenuDrawer from '../components/SideMenuDrawer';
 
 export default function BudgetScreen({ navigation }) {
   const [budgetInfo] = useState({
@@ -25,13 +26,24 @@ export default function BudgetScreen({ navigation }) {
 
   const [showModal, setShowModal] = useState(false);
 
+  const [isMenuVisible, setMenuVisible] = useState(false);
+  
+
   return (
     <SafeAreaView style={styles.safe}>
       <Header
         title="내돈내픽"
-        canGoBack={true}
-        onBackPress={() => navigation.goBack()}
+        canGoBack={false}
+        onMenuPress={() => setMenuVisible(true)}
       />
+
+      <SideMenuDrawer
+              isVisible={isMenuVisible}
+              onClose={() => setMenuVisible(false)}
+              onLoginPress={() => 
+                navigation.navigate('LoginMain')
+              }
+            />
 
       <View style={styles.container}>
 

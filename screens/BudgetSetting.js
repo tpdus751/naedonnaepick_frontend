@@ -5,6 +5,7 @@ import Slider from '@react-native-community/slider';
 import Header from '../components/Header';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
+import SideMenuDrawer from '../components/SideMenuDrawer';
 
 export default function BudgetSettingScreen() {
   const navigation = useNavigation();
@@ -14,6 +15,8 @@ export default function BudgetSettingScreen() {
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [budget, setBudget] = useState(100000);
+
+  const [isMenuVisible, setMenuVisible] = useState(false);
 
   const formatDate = (date) => {
     return date.toISOString().slice(0, 10);
@@ -25,7 +28,17 @@ export default function BudgetSettingScreen() {
         title="내돈내픽"
         canGoBack={true}
         onBackPress={() => navigation.goBack()}
+        onMenuPress={() => setMenuVisible(true)}
       />
+
+      <SideMenuDrawer
+              isVisible={isMenuVisible}
+              onClose={() => setMenuVisible(false)}
+              onLoginPress={() => 
+                navigation.navigate('LoginMain')
+                /* navigation.navigate('LoginMain'); */
+              }
+            />
       <View style={styles.container}>
         <Text style={styles.title}>예산설정</Text>
         <View style={styles.dateRow}>
