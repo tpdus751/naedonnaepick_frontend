@@ -5,12 +5,11 @@ import BottomTabNavigator from './BottomTabNavigator';
 
 
 // 화면 컴포넌트 import
- import BudgetScreen from '../screens/BudgetScreen';
- import BudgetSetting from '../screens/BudgetSetting';
+import BudgetScreen from '../screens/BudgetScreen';
+import BudgetSetting from '../screens/BudgetSetting';
 import SomeDetailScreen from '../screens/SomeDetailScreen'; // 상세보기 화면 예시
 
 import LoginScreen from '../screens/MainLoginPage'; 
-import BudgetSetting from '../screens/BudgetSetting';
 // import LoginMainScreen from '../screens/LoginMainScreen';
 
 

@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Button, TextInput, Platform } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  TextInput,
+} from 'react-native';
+import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import Slider from '@react-native-community/slider';
 
 export default function BudgetSettingScreen({ navigation }) {
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
-  const [showStartPicker, setShowStartPicker] = useState(false);
-  const [showEndPicker, setShowEndPicker] = useState(false);
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
+  const [isStart, setIsStart] = useState(true);
   const [budget, setBudget] = useState(100000);
 
   // 날짜 포맷 함수
@@ -15,46 +21,49 @@ export default function BudgetSettingScreen({ navigation }) {
     return date.toISOString().slice(0, 10);
   };
 
+  // 날짜 선택기 표시
+  const showDatePicker = (isStartDate) => {
+    setIsStart(isStartDate);
+    setDatePickerVisibility(true);
+  };
+
+  // 날짜 선택기 숨기기
+  const hideDatePicker = () => {
+    setDatePickerVisibility(false);
+  };
+
+  // 날짜 선택 완료
+  const handleConfirm = (date) => {
+    if (isStart) {
+      setStartDate(date);
+    } else {
+      setEndDate(date);
+    }
+    hideDatePicker();
+  };
+
   return (
-    
     <View style={styles.container}>
       <Text style={styles.title}>예산정하기</Text>
+
       <View style={styles.dateRow}>
         <Text style={styles.label}>시작일</Text>
-        <TouchableOpacity onPress={() => setShowStartPicker(true)}>
+        <TouchableOpacity onPress={() => showDatePicker(true)}>
           <Text style={styles.dateBtn}>{formatDate(startDate)}</Text>
         </TouchableOpacity>
         <Text style={styles.label}>종료일</Text>
-        <TouchableOpacity onPress={() => setShowEndPicker(true)}>
+        <TouchableOpacity onPress={() => showDatePicker(false)}>
           <Text style={styles.dateBtn}>{formatDate(endDate)}</Text>
         </TouchableOpacity>
       </View>
 
-      {/* 날짜 선택기 */}
-      {showStartPicker && (
-        <DateTimePicker
-          value={startDate}
-          mode="date"
-          display="default"
-          onChange={(event, selectedDate) => {
-            setShowStartPicker(Platform.OS === 'ios');
-            if (selectedDate) setStartDate(selectedDate);
-          }}
-        />
-      )}
-      {showEndPicker && (
-        <DateTimePicker
-          value={endDate}
-          mode="date"
-          display="default"
-          onChange={(event, selectedDate) => {
-            setShowEndPicker(Platform.OS === 'ios');
-            if (selectedDate) setEndDate(selectedDate);
-          }}
-        />
-      )}
+      <DateTimePickerModal
+        isVisible={isDatePickerVisible}
+        mode="date"
+        onConfirm={handleConfirm}
+        onCancel={hideDatePicker}
+      />
 
-      {/* 예산 슬라이더 */}
       <View style={styles.sliderBox}>
         <Text style={styles.label}>예산설정</Text>
         <Slider
@@ -71,11 +80,10 @@ export default function BudgetSettingScreen({ navigation }) {
         <Text style={styles.budgetNum}>₩{budget.toLocaleString()}</Text>
       </View>
 
-      {/* 직접 입력 */}
       <TextInput
         style={styles.input}
         value={budget.toString()}
-        onChangeText={text => setBudget(Number(text.replace(/[^0-9]/g, '')))}
+        onChangeText={(text) => setBudget(Number(text.replace(/[^0-9]/g, '')))}
         keyboardType="numeric"
         placeholder="예산 입력"
       />
@@ -84,7 +92,10 @@ export default function BudgetSettingScreen({ navigation }) {
         * 따로 설정하지 않으면 계속 이 가격으로 예산이 정해집니다.
       </Text>
 
-      <TouchableOpacity style={styles.confirmBtn} onPress={() => navigation.goBack()}>
+      <TouchableOpacity
+        style={styles.confirmBtn}
+        onPress={() => navigation.goBack()}
+      >
         <Text style={styles.confirmBtnText}>확인</Text>
       </TouchableOpacity>
     </View>
@@ -93,8 +104,20 @@ export default function BudgetSettingScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', padding: 24, paddingTop: 40 },
-  title: { fontSize: 22, fontWeight: 'bold', textAlign: 'center', marginBottom: 20, color: '#222' },
-  dateRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 20, gap: 8 },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
+    color: '#222',
+  },
+  dateRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    gap: 8,
+  },
   label: { fontSize: 15, color: '#444', marginHorizontal: 4 },
   dateBtn: {
     fontSize: 15,
@@ -107,7 +130,13 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   sliderBox: { marginBottom: 10 },
-  budgetNum: { fontSize: 18, fontWeight: 'bold', color: '#22315b', textAlign: 'center', marginTop: 6 },
+  budgetNum: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#22315b',
+    textAlign: 'center',
+    marginTop: 6,
+  },
   input: {
     borderWidth: 1,
     borderColor: '#bfc8e0',
@@ -119,7 +148,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     backgroundColor: '#f5f5f7',
   },
-  notice: { color: '#888', fontSize: 13, textAlign: 'center', marginTop: 6, marginBottom: 16 },
+  notice: {
+    color: '#888',
+    fontSize: 13,
+    textAlign: 'center',
+    marginTop: 6,
+    marginBottom: 16,
+  },
   confirmBtn: {
     backgroundColor: '#e0e4ef',
     paddingVertical: 12,
@@ -135,5 +170,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     letterSpacing: -0.5,
   },
-  
 });
