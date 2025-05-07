@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, ScrollView, SafeAreaView } from 'react-native';
+import Header from '../components/Header'; // 헤더 컴포넌트 임포트
 
 export default function BudgetScreen({ navigation }) {
   const [budgetInfo] = useState({
@@ -26,6 +27,12 @@ export default function BudgetScreen({ navigation }) {
 
   return (
     <SafeAreaView style={styles.safe}>
+      <Header
+        title="내돈내픽"
+        canGoBack={true}
+        onBackPress={() => navigation.goBack()}
+      />
+
       <View style={styles.container}>
 
         <Text style={styles.title}>현재예산</Text>
@@ -63,14 +70,14 @@ export default function BudgetScreen({ navigation }) {
             onPress={() => navigation.navigate('BudgetSetting')}
             activeOpacity={0.8}
           >
-            <Text style={styles.actionBtnText}>현재예산</Text>
+            <Text style={styles.actionBtnText}>예산설정</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionBtn}
             onPress={() => navigation.navigate('Detail')}
             activeOpacity={0.8}
           >
-            <Text style={styles.actionBtnText}>상세보기</Text>
+            <Text style={styles.actionBtnText}>과거기록</Text>
           </TouchableOpacity>
         </View>
 
