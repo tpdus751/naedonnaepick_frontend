@@ -1,14 +1,33 @@
 // screens/LoginScreen.js
-
-import React from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import { React, useState } from 'react';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Image, SafeAreaView } from 'react-native';
+import Header from '../components/Header';
+import SideMenuDrawer from '../components/SideMenuDrawer';
+import styled from 'styled-components/native';
 import { useNavigation } from '@react-navigation/native';
 
 export default function LoginScreen() {
+
   const navigation = useNavigation();
+
+  const [isMenuVisible, setMenuVisible] = useState(false);
+
   return (
+    <Container>
+      <Header
+        title="내돈내픽"
+        canGoBack={true}
+        onBackPress={() => navigation.goBack()}
+        onMenuPress={() => setMenuVisible(true)}
+      />
+      
+      <SideMenuDrawer
+        isVisible={isMenuVisible}
+        onClose={() => setMenuVisible(false)}
+        onLoginPress={() => navigation.navigate('LoginMain')}
+      />
     <View style={styles.container}>
-      <Text style={styles.title}>내돈내픽</Text>
+      <Text style={styles.title}>서비스를 이용하시려면{'\n'}로그인이 필요합니다.</Text>
 
       <TextInput
         placeholder="이메일을 입력하세요." //칸에 흐리게 안내 문구 표시
@@ -51,8 +70,15 @@ export default function LoginScreen() {
       </TouchableOpacity>
 
     </View>
+    </Container>
   );
 }
+
+const Container = styled(SafeAreaView)`
+  flex: 1;
+  background-color: #fff;
+  padding: 20px;
+`;
 
 const styles = StyleSheet.create({
   container: {
@@ -62,10 +88,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   title: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
     alignSelf: 'center',
     marginBottom: 40,
+    lineHeight: 32, // 추가
+    textAlign: 'center', // 혹시 중앙 정렬이 안 되면 명시
   },
   input: {
     borderWidth: 1,

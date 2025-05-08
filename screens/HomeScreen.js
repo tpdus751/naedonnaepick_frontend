@@ -85,6 +85,7 @@ const Description = styled.Text`
   font-size: 16px;
   color: #333;
   margin-bottom: 24px;
+  line-height: 24px;  // ✅ 추가
 `;
 
 const ButtonContainer = styled.View`
