@@ -2,10 +2,9 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import BottomTabNavigator from './BottomTabNavigator';
-
 import SomeDetailScreen from '../screens/SomeDetailScreen'; // 예시로 추가한 상세 화면
-import LoginScreen from '../screens/MainLoginPage'; 
-// import LoginMainScreen from '../screens/LoginMainScreen';
+import LoginScreen from '../screens/MainLoginPage';
+import SignUpScreen from '../screens/SignUpScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -18,6 +17,7 @@ export default function StackNavigator() {
       {/* 추가로 Stack 화면을 연결하고 싶을 때 */}
       <Stack.Screen name="Detail" component={SomeDetailScreen} />
       <Stack.Screen name="LoginMain" component={LoginScreen} />
+      <Stack.Screen name="SignUp" component={SignUpScreen} />
     </Stack.Navigator>
   );
 }
