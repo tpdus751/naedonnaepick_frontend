@@ -8,10 +8,8 @@ import BottomTabNavigator from './BottomTabNavigator';
 import BudgetScreen from '../screens/BudgetScreen';
 import BudgetSetting from '../screens/BudgetSetting';
 import SomeDetailScreen from '../screens/SomeDetailScreen'; // 상세보기 화면 예시
-
-import LoginScreen from '../screens/MainLoginPage'; 
-// import LoginMainScreen from '../screens/LoginMainScreen';
-
+import LoginScreen from '../screens/MainLoginPage';
+import SignUpScreen from '../screens/SignUpScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -29,6 +27,7 @@ export default function StackNavigator() {
 
       <Stack.Screen name="LoginMain" component={LoginScreen} />
 
+      <Stack.Screen name="SignUp" component={SignUpScreen} />
     </Stack.Navigator>
   );
 }
