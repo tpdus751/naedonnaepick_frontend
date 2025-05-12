@@ -10,6 +10,9 @@ import BudgetSetting from '../screens/BudgetSetting';
 import SomeDetailScreen from '../screens/SomeDetailScreen'; // 상세보기 화면 예시
 
 import LoginScreen from '../screens/MainLoginPage'; 
+import RecommendationScreen from '../screens/RecommendationScreen';
+import RestaurantListScreen from '../screens/RestaurantListScreen';
+import RestaurantDetailScreen from '../screens/RestaurantDetailScreen';
 // import LoginMainScreen from '../screens/LoginMainScreen';
 
 
@@ -28,6 +31,12 @@ export default function StackNavigator() {
       <Stack.Screen name="Detail" component={SomeDetailScreen} />
 
       <Stack.Screen name="LoginMain" component={LoginScreen} />
+
+      <Stack.Screen name="restaurant" component={RecommendationScreen} />
+
+      <Stack.Screen name="RestaurantListScreen" component={RestaurantListScreen} />
+
+      <Stack.Screen name="RestaurantDetailScreen" component={RestaurantDetailScreen} />
 
     </Stack.Navigator>
   );
