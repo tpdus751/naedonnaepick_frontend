@@ -1,9 +1,12 @@
 // RestaurantDetailScreen.js
-import React from 'react';
-import { View, Text, Image, StyleSheet, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, Image, StyleSheet, ScrollView, Alert } from 'react-native';
 import Header from '../components/Header';
 import styled from 'styled-components/native';
 import { SafeAreaView } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import SideMenuDrawer from '../components/SideMenuDrawer';
+import { TouchableOpacity } from 'react-native';
 
 
 const Container = styled(SafeAreaView)`
@@ -21,55 +24,76 @@ const restaurant = {
       id: '1',
       name: '카산도 미소카츠 정식',
       price: '₩15,000',
-      image: require('../imgs/음식점 1 음식 1.jpg'),
     },
     {
       id: '2',
       name: '특 등심카츠 정식',
       price: '₩16,000',
-      image: require('../imgs/음식점 1 음식 2.jpg'),
     },
     {
         id: '3',
         name: '등심카츠 정식',
         price: '₩14,000',
-        image: require('../imgs/음식점 1 음식 3.jpg'),
-    }
-  ],
+    },
+  ]
 };
 
 const RestaurantDetailScreen = () => {
+  const navigation = useNavigation();
+  const [isMenuVisible, setMenuVisible] = useState(false);
   return (
     <Container>
-<Header 
+      <Header 
         title="내돈내픽"  
-        canGoBack={false}
+        canGoBack={true}
         onBackPress={() => navigation.goBack()}
-        onMenuPress={() => Alert.alert('메뉴 버튼 클릭')}
+        onMenuPress={() => setMenuVisible(true)}
       /> 
-    <ScrollView style={styles.container}>
+      <SideMenuDrawer
+                    isVisible={isMenuVisible}
+                    onClose={() => setMenuVisible(false)}
+                    onLoginPress={() => 
+                      navigation.navigate('LoginMain')
+                    }
+                  />
+      <ScrollView style={styles.container}>
       {/* 대표 사진 */}
       <View style={styles.headerSection}>
-  <Image source={restaurant.featuredImage} style={styles.thumbnail} />
-  <View style={styles.info}>
-    <Text style={styles.sectionTitle}>{restaurant.name}</Text>
-    <Text style={styles.description}>{restaurant.description}</Text>
-  </View>
-</View>
-<View style={styles.separator} />
-
+        <Image source={restaurant.featuredImage} style={styles.thumbnail} />
+        <View style={styles.info}>
+          <Text style={styles.sectionTitle}>{restaurant.name}</Text>
+          <Text style={styles.description}>{restaurant.description}</Text>
+        </View>
+      </View>
+      <View style={styles.separator} />
+                    
       {/* 메뉴 섹션 */}
-      <View style={styles.section}>
+      <View style={[styles.section]}>
         <Text style={styles.sectionTitle}>메뉴</Text>
         {restaurant.menu.map((item) => (
-            <View key={item.id} style={styles.menuItem}>
-            <Image source={item.image} style={styles.menuImage} />
-            <View style={styles.menuTextContainer}>
-              <Text style={styles.menuName}>{item.name}</Text>
-              <Text style={styles.menuPrice}>{item.price}</Text>
-            </View>
+        <View key={item.id} style={styles.menuItem}>
+          <View style={styles.menuTextContainer}>
+            <Text style={styles.menuName}>{item.name}</Text>
+            <Text style={styles.menuPrice}>{item.price}</Text>
           </View>
-        ))}
+          <TouchableOpacity
+            style={styles.selectButton}
+            onPress={() =>
+              Alert.alert(
+                '메뉴 선택 확인',
+                `현재 예산에서 ${item.price}원이 차감됩니다.`,
+                [
+                  { text: '확인', onPress: () => console.log(`${item.name} 선택됨`) },
+                  { text: '취소', onPress: () => console.log('취소됨'), style: 'cancel' },
+                ]
+              )
+            }
+          >
+            <Text style={styles.selectButtonText}>선택</Text>
+          </TouchableOpacity>
+        </View>
+      ))}
+
       </View>
     </ScrollView>
 </Container>
@@ -135,6 +159,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#777',
   },
+  selectButton: {
+  backgroundColor: '#007BFF',
+  paddingVertical: 6,
+  paddingHorizontal: 12,
+  borderRadius: 4,
+},
+selectButtonText: {
+  color: '#fff',
+  fontSize: 14,
+},
 });
 
 export default RestaurantDetailScreen;
