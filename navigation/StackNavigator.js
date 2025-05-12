@@ -11,7 +11,6 @@ import SomeDetailScreen from '../screens/SomeDetailScreen'; // 상세보기 화�
 import SignUpScreen from '../screens/SignUpScreen';
 
 import LoginScreen from '../screens/MainLoginPage'; 
-import RecommendationScreen from '../screens/RecommendationScreen';
 import RestaurantListScreen from '../screens/RestaurantListScreen';
 import RestaurantDetailScreen from '../screens/RestaurantDetailScreen';
 // import LoginMainScreen from '../screens/LoginMainScreen';
@@ -30,6 +29,12 @@ export default function StackNavigator() {
       <Stack.Screen name="BudgetSetting" component={BudgetSetting} />
       {/* 추가로 Stack 화면을 연결하고 싶을 때 */}
       <Stack.Screen name="Detail" component={SomeDetailScreen} />
+
+      <Stack.Screen name="SignUp" component={SignUpScreen} />
+
+      <Stack.Screen name="RestaurantListScreen" component={RestaurantListScreen} />
+
+      <Stack.Screen name="RestaurantDetailScreen" component={RestaurantDetailScreen} />
 
       <Stack.Screen name="LoginMain" component={LoginScreen} />
 
