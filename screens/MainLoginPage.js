@@ -51,7 +51,7 @@ export default function LoginScreen() {
 
       <Text style={styles.orText}>or</Text>
 
-      <TouchableOpacity style={styles.signupButton}>
+      <TouchableOpacity style={styles.signupButton} onPress={() => navigation.navigate('SignUp')}>
         <Text style={styles.signupText}>일반 회원가입 하기</Text>
       </TouchableOpacity>
 

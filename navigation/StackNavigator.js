@@ -8,6 +8,7 @@ import BottomTabNavigator from './BottomTabNavigator';
 import BudgetScreen from '../screens/BudgetScreen';
 import BudgetSetting from '../screens/BudgetSetting';
 import SomeDetailScreen from '../screens/SomeDetailScreen'; // 상세보기 화면 예시
+import SignUpScreen from '../screens/SignUpScreen';
 
 import LoginScreen from '../screens/MainLoginPage'; 
 import RecommendationScreen from '../screens/RecommendationScreen';
@@ -31,12 +32,6 @@ export default function StackNavigator() {
       <Stack.Screen name="Detail" component={SomeDetailScreen} />
 
       <Stack.Screen name="LoginMain" component={LoginScreen} />
-
-      <Stack.Screen name="restaurant" component={RecommendationScreen} />
-
-      <Stack.Screen name="RestaurantListScreen" component={RestaurantListScreen} />
-
-      <Stack.Screen name="RestaurantDetailScreen" component={RestaurantDetailScreen} />
 
     </Stack.Navigator>
   );
