@@ -7,7 +7,7 @@ import PriceSlider from '../components/PriceSlider';
 import LocationInput from '../components/LocationInput';
 import TasteSelector from '../components/TasteSelector';
 import { useNavigation } from '@react-navigation/native';
-import BottomTabNavigator from '../navigation/BottomTabNavigator';
+import SideMenuDrawer from '../components/SideMenuDrawer';
 
 // ✅ styled-component는 반드시 컴포넌트 함수 밖에서 선언해야 함!
 const Container = styled(SafeAreaView)`
@@ -22,6 +22,7 @@ const RecommendationScreen = () => {
   const [location, setLocation] = useState('');
   const [tasteLevel, setTasteLevel] = useState(5);
   const [restaurants, setRestaurants] = useState([]);
+  const [isMenuVisible, setMenuVisible] = useState(false);
 
   // const handleSearch = async () => {
   //   try {
@@ -44,9 +45,15 @@ const RecommendationScreen = () => {
       <Header 
               title="내돈내픽"  
               canGoBack={false}
-              onBackPress={() => navigation.goBack()}
-              onMenuPress={() => Alert.alert('메뉴 버튼 클릭')}
+              onMenuPress={() => setMenuVisible(true)}
             /> 
+      <SideMenuDrawer
+                          isVisible={isMenuVisible}
+                          onClose={() => setMenuVisible(false)}
+                          onLoginPress={() => 
+                            navigation.navigate('LoginMain')
+                          }
+                        />
       <View style={styles.container}>
         <Text style={styles.title}>음식점 추천</Text>
         <PriceSlider value={priceRange} onChange={setPriceRange} />
