@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Button, StyleSheet, Alert } from 'react-native';
+import { View, Text, Button, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native';
 import styled from 'styled-components/native';
 import Header from '../components/Header';
@@ -8,6 +8,7 @@ import LocationInput from '../components/LocationInput';
 import TasteSelector from '../components/TasteSelector';
 import { useNavigation } from '@react-navigation/native';
 import SideMenuDrawer from '../components/SideMenuDrawer';
+import { TAGS } from '../components/TasteSelector';
 
 // ✅ styled-component는 반드시 컴포넌트 함수 밖에서 선언해야 함!
 const Container = styled(SafeAreaView)`
@@ -20,7 +21,13 @@ const RecommendationScreen = () => {
   const navigation = useNavigation();
   const [priceRange, setPriceRange] = useState([5000, 20000]);
   const [location, setLocation] = useState('');
-  const [tasteLevel, setTasteLevel] = useState(5);
+  const [tasteLevel, setTasteLevel] = useState(() => {
+    const initial = {};
+    TAGS.forEach(tag => {
+      initial[tag] = 0; // 숫자 초기값
+    });
+    return initial;
+  });
   const [restaurants, setRestaurants] = useState([]);
   const [isMenuVisible, setMenuVisible] = useState(false);
 
@@ -43,30 +50,34 @@ const RecommendationScreen = () => {
   return (
     <Container>
       <Header 
-              title="내돈내픽"  
-              canGoBack={false}
-              onMenuPress={() => setMenuVisible(true)}
-            /> 
+        title="내돈내픽"  
+        canGoBack={false}
+        onMenuPress={() => setMenuVisible(true)}
+      /> 
       <SideMenuDrawer
-                          isVisible={isMenuVisible}
-                          onClose={() => setMenuVisible(false)}
-                          onLoginPress={() => 
-                            navigation.navigate('LoginMain')
-                          }
-                        />
-      <View style={styles.container}>
-        <Text style={styles.title}>음식점 추천</Text>
-        <PriceSlider value={priceRange} onChange={setPriceRange} />
-        <LocationInput value={location} onChange={setLocation} />
-        <TasteSelector value={tasteLevel} onChange={setTasteLevel} />
-        <Button title="검색" onPress={() => navigation.navigate('RestaurantListScreen')} />
-      </View>
-      
+        isVisible={isMenuVisible}
+        onClose={() => setMenuVisible(false)}
+        onLoginPress={() => 
+          navigation.navigate('LoginMain')
+        }
+      />
+      <ScrollView style={styles.scrollContainer}>
+        <View style={styles.container}>
+          <Text style={styles.title}>음식점 추천</Text>
+          <PriceSlider value={priceRange} onChange={setPriceRange} />
+          <LocationInput value={location} onChange={setLocation} />
+          <TasteSelector value={tasteLevel} onChange={setTasteLevel} />
+          <Button title="검색" onPress={() => navigation.navigate('RestaurantListScreen')} />
+        </View>
+      </ScrollView>
     </Container>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    flex: 1,
+  },
   container: {
     flex: 1,
     padding: 16,
