@@ -1,11 +1,14 @@
 // screens/HomeScreen.js
-import React from 'react';
+import React, { useState } from 'react';
 import { SafeAreaView, Image, Alert } from 'react-native';
 import styled from 'styled-components/native';
 import Header from '../components/Header';
-import { useNavigation } from '@react-navigation/native'; // ✅ 1
+import { useNavigation } from '@react-navigation/native'; 
+import SideMenuDrawer from '../components/SideMenuDrawer';
 
 export default function HomeScreen() {
+  const [isMenuVisible, setMenuVisible] = useState(false);
+
   const navigation = useNavigation(); 
 
   return (
@@ -14,26 +17,22 @@ export default function HomeScreen() {
         title="내돈내픽"  
         canGoBack={false}
         onBackPress={() => Alert.alert('뒤로가기 버튼 클릭')}
-        onMenuPress={() => Alert.alert('메뉴 버튼 클릭')}
+        onMenuPress={() => setMenuVisible(true)}
       /> 
+
+      <SideMenuDrawer
+        isVisible={isMenuVisible}
+        onClose={() => setMenuVisible(false)}
+        onLoginPress={() => 
+          navigation.navigate('LoginMain')
+        }
+      />
+
       {/* 상단 이미지 + 설명 */}
       <Banner source={{ uri: 'https://cdn.gimhaenews.co.kr/news/photo/201501/11563_17242_3954.jpg' }} />
       <Description>
-        가격대와 선호 항목을 설정하고{'\n'}나에게 맞는 음식점을 추천 받아보세요
+        가격대와 선호 항목을 설정하고{'\n'}나에게 맞는 음식점을 추천 받아보세요....
       </Description>
-
-      {/* 버튼 3개 */}
-      <ButtonContainer>
-        <MainButton onPress={() => navigation.navigate('Detail')}>
-          <ButtonText>음식점 검색</ButtonText>
-        </MainButton>
-        <MainButton onPress={() => navigation.navigate('Detail')}>
-          <ButtonText>예산 관리</ButtonText>
-        </MainButton>
-        <MainButton onPress={() => navigation.navigate('Detail')}>
-          <ButtonText>채팅방 가기</ButtonText>
-        </MainButton>
-      </ButtonContainer>
 
       {/* 예산 + 위치 정보 */}
       <InfoText>내 예산: 33,000원</InfoText>
@@ -72,6 +71,7 @@ const Description = styled.Text`
   font-size: 16px;
   color: #333;
   margin-bottom: 24px;
+  line-height: 24px;  // ✅ 추가
 `;
 
 const ButtonContainer = styled.View`
