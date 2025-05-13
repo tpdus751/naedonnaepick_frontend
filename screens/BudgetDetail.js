@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import SideMenuDrawer from '../components/SideMenuDrawer';
 
-export default function BudgetSettingScreen() {
+export default function BudgetDetail() {
   const navigation = useNavigation();
 
   const [startDate, setStartDate] = useState(new Date());

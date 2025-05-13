@@ -17,6 +17,7 @@ const Container = styled(SafeAreaView)`
 `;
 
 const RecommendationScreen = () => {
+  
   const navigation = useNavigation();
   const [priceRange, setPriceRange] = useState([5000, 20000]);
   const [location, setLocation] = useState('');
@@ -39,7 +40,7 @@ const RecommendationScreen = () => {
   //     console.error('검색 오류:', error);
   //   }
   // };
-
+  
   return (
     <Container>
       <Header 

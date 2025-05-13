@@ -18,7 +18,7 @@ export default function Header({ title, canGoBack = false, onBackPress, onMenuPr
 
       {/* 가운데: 타이틀 */}
       <Title numberOfLines={1}>{title}</Title>
-
+      
       {/* 오른쪽: 메뉴 아이콘 */}
       <MenuButton onPress={onMenuPress}>
         <Ionicons name="menu" size={24} color="black" />
