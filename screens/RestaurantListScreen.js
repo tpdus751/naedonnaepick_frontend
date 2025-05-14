@@ -1,44 +1,30 @@
-// RestaurantListScreen.js
 import React from 'react';
 import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
 import { SafeAreaView } from 'react-native';
 import Header from '../components/Header';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 const Container = styled(SafeAreaView)`
   flex: 1;
   background-color: #fff;
   padding: 20px;
 `;
-const restaurantData = [
-  {
-    id: '1',
-    name: '카산도',
-    description: '카츠 , 카레 ,산도가 맛있는 나만의 섬 카산도에 여러분을 초대합니다.',
-    image: require('../imgs/음식점 1.jpg'),
-  },
-  {
-    id: '2',
-    name: '돌판 하나',
-    description: '대한민국 상위 1프로 지례 흑돼지를 취급하고 있습니다',
-    image: require('../imgs/음식점 2.jpg'),
-  },
-  {
-    id: '3',
-    name: '갓 잇',
-    description: '줄 서서 먹는 타코 맛집 갓잇 분당정자점입니다.',
-    image: require('../imgs/음식점 3.jpg'),
-  }
-];
 
 const RestaurantListScreen = () => {
   const navigation = useNavigation();
+  const route = useRoute();
+
+  // 네비게이션으로 전달된 필터링된 음식점 데이터
+  const { restaurants } = route.params;
 
   const renderItem = ({ item }) => (
-    <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('RestaurantDetailScreen')}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => navigation.navigate('RestaurantDetailScreen', { restaurant: item })}
+    >
       {item.image ? (
-        <Image source={item.image} style={styles.image}/>
+        <Image source={item.image} style={styles.image} />
       ) : (
         <View style={styles.placeholderImage}>
           <Text style={styles.placeholderText}>이미지 없음</Text>
@@ -47,38 +33,51 @@ const RestaurantListScreen = () => {
       <View style={styles.info}>
         <Text style={styles.title}>{item.name}</Text>
         <Text style={styles.description}>{item.description}</Text>
+        <Text style={styles.price}>
+          ₩{item.priceRange[0].toLocaleString()} - ₩{item.priceRange[1].toLocaleString()}
+        </Text>
+        <Text style={styles.location}>위치: {item.location}</Text>
       </View>
     </TouchableOpacity>
   );
-  
+
+  if (!restaurants || restaurants.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>검색 결과가 없습니다.</Text>
+      </View>
+    );
+  }
 
   return (
     <Container>
-      <Header 
-        title="내돈내픽"  
-        canGoBack={false}
+      <Header
+        title="음식점 리스트"
+        canGoBack={true}
         onBackPress={() => navigation.goBack()}
-        onMenuPress={() => Alert.alert('메뉴 버튼 클릭')}
-      /> 
-      <View style={styles.container}>
-        <FlatList
-          data={restaurantData}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ padding: 16 }}
-          />
-      </View>
+      />
+      <FlatList
+        data={restaurants}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={{ padding: 16 }}
+      />
     </Container>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  emptyContainer: {
     flex: 1,
-    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 18,
+    color: '#777',
   },
   card: {
-    flexDirection: 'row', // 이미지와 텍스트를 나란히
+    flexDirection: 'row',
     backgroundColor: '#f9f9f9',
     borderRadius: 12,
     marginBottom: 16,
@@ -87,7 +86,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   image: {
-    width: 100, // 이미지 너비를 절반 이하로
+    width: 100,
     height: 100,
     borderTopLeftRadius: 12,
     borderBottomLeftRadius: 12,
@@ -98,8 +97,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#ddd',
     justifyContent: 'center',
     alignItems: 'center',
-    borderTopLeftRadius: 12,
-    borderBottomLeftRadius: 12,
   },
   placeholderText: {
     color: '#888',
@@ -118,7 +115,16 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: '#555',
   },
+  price: {
+    marginTop: 4,
+    fontSize: 12,
+    color: '#007AFF',
+  },
+  location: {
+    marginTop: 4,
+    fontSize: 12,
+    color: '#777',
+  },
 });
-
 
 export default RestaurantListScreen;

@@ -9,13 +9,15 @@ const regions = [
   '구미동', '수내동', '금곡동', '정자1동', '판교동'
 ];
 
+// 🚀 지역을 가나다순으로 정렬
+const sortedRegions = regions.sort((a, b) => a.localeCompare(b, 'ko'));
 
 const LocationInput = ({ value, onChange }) => {
   return (
     <View style={styles.container}>
       <Text>지역 선택</Text>
       <View style={styles.buttonContainer}>
-        {regions.map(region => (
+        {sortedRegions.map(region => (
           <Button
             key={region}
             title={region}
