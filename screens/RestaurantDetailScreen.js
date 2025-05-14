@@ -110,6 +110,16 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#777',
   },
+  selectButton: {
+  backgroundColor: '#007BFF',
+  paddingVertical: 6,
+  paddingHorizontal: 12,
+  borderRadius: 4,
+},
+selectButtonText: {
+  color: '#fff',
+  fontSize: 14,
+},
 });
 
 export default RestaurantDetailScreen;

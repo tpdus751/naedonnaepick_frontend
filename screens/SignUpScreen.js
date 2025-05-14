@@ -1,6 +1,6 @@
 // screens/SignUpScreen.js
 
-import React, { useState } from 'react';
+import React, { useState, useNavigation } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import styled from 'styled-components/native';
 import Header from '../components/Header';

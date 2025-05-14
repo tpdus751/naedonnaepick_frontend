@@ -7,6 +7,7 @@ import PriceSlider from '../components/PriceSlider';
 import LocationInput from '../components/LocationInput';
 import TasteSelector from '../components/TasteSelector';
 import { useNavigation } from '@react-navigation/native';
+import SideMenuDrawer from '../components/SideMenuDrawer';
 import { fetchRestaurants } from '../api/RestaurantAPI';
 
 // ✅ Styled-components 선언
@@ -16,12 +17,30 @@ const Container = styled(SafeAreaView)`
 `;
 
 const RecommendationScreen = () => {
+  
   const navigation = useNavigation();
   const [priceRange, setPriceRange] = useState([5000, 20000]);
   const [location, setLocation] = useState('');
   const [tastePreferences, setTastePreferences] = useState({});
   const [restaurants, setRestaurants] = useState([]);
+  const [isMenuVisible, setMenuVisible] = useState(false);
 
+  // const handleSearch = async () => {
+  //   try {
+  //     const response = await axios.get('/api/restaurants', {
+  //       params: {
+  //         minPrice: priceRange[0],
+  //         maxPrice: priceRange[1],
+  //         location,
+  //         taste: tasteLevel,
+  //       },
+  //     });
+  //     setRestaurants(response.data);
+  //   } catch (error) {
+  //     console.error('검색 오류:', error);
+  //   }
+  // };
+  
   // 검색 핸들러 함수
   const handleSearch = async () => {
     try {
@@ -66,12 +85,19 @@ const RecommendationScreen = () => {
 
   return (
     <Container>
-      <Header
-        title="내돈내픽"
-        canGoBack={false}
-        onBackPress={() => navigation.goBack()}
-        onMenuPress={() => Alert.alert('메뉴 버튼 클릭')}
-      />
+      <Header 
+              title="내돈내픽"  
+              canGoBack={false}
+              onMenuPress={() => setMenuVisible(true)}
+            /> 
+      <SideMenuDrawer
+                          isVisible={isMenuVisible}
+                          onClose={() => setMenuVisible(false)}
+                          onLoginPress={() => 
+                            navigation.navigate('LoginMain')
+                          }
+                        />
+      <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <Text style={styles.title}>음식점 추천</Text>
         <PriceSlider value={priceRange} onChange={setPriceRange} />
@@ -79,6 +105,7 @@ const RecommendationScreen = () => {
         <TasteSelector value={tastePreferences} onChange={setTastePreferences} />
         <Button title="검색" onPress={handleSearch} />
       </ScrollView>
+      </View>
     </Container>
   );
 };

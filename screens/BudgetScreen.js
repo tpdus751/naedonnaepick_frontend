@@ -86,7 +86,7 @@ export default function BudgetScreen({ navigation }) {
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionBtn}
-            onPress={() => navigation.navigate('Detail')}
+            onPress={() => navigation.navigate('BudgetDetail')}
             activeOpacity={0.8}
           >
             <Text style={styles.actionBtnText}>과거기록</Text>
