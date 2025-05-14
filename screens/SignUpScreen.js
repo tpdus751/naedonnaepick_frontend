@@ -1,33 +1,31 @@
 // screens/SignUpScreen.js
-
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import styled from 'styled-components/native';
 import Header from '../components/Header';
 
 export default function SignUpScreen({ navigation }) {
-  const [step, setStep] = useState(1); // 현재 단계 (1: 개인정보 입력, 2: 선호도 선택)
+  const [step, setStep] = useState(1);
 
   // 개인정보 입력 상태
-  const [name, setName] = useState('');
-  const [birth, setBirth] = useState('');
-  const [phone, setPhone] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [nickname, setNickname] = useState('');
   const [email, setEmail] = useState('');
-  const [address, setAddress] = useState('');
+  const [password, setPassword] = useState('');
 
-  // 선호도 입력 상태 (1~5점)
+  // 선호도 입력 상태
   const preferenceTags = [
     '매운맛', '가성비', '친절함', '청결함', '분위기', '양 많음', '맛집',
     '웨이팅 있음', '달콤함', '짭짤함', '고소함', '신선함', '혼밥 가능', '트렌디함', '주차 편의성'
   ];
   const [preferences, setPreferences] = useState(
     preferenceTags.reduce((acc, tag) => {
-      acc[tag] = 3; // 기본값 3점
+      acc[tag] = 3;
       return acc;
     }, {})
   );
 
-  // 선호도 점수 조절
   const handlePreferenceChange = (tag, value) => {
     setPreferences(prev => ({
       ...prev,
@@ -35,57 +33,85 @@ export default function SignUpScreen({ navigation }) {
     }));
   };
 
-  // 개인정보 입력 완료 후 다음 단계
   const handleNext = () => {
-    if (name && birth && phone && email && address) {
-      setStep(2);
-    } else {
+    if (!firstName || !lastName || !nickname || !email || !password) {
       alert('모든 항목을 입력해주세요.');
+      return;
     }
+
+    const nameRegex = /^[A-Za-z]+$/;
+    if (!nameRegex.test(firstName) || !nameRegex.test(lastName)) {
+      alert('이름은 영어로 입력해야 합니다.');
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      alert('유효한 이메일 주소를 입력해주세요.');
+      return;
+    }
+
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      alert('비밀번호는 영문자와 숫자를 포함한 8자 이상이어야 합니다.');
+      return;
+    }
+
+    setStep(2);
   };
 
-  // 회원가입 완료 처리
   const handleSubmit = () => {
-    // 여기서 서버로 회원가입 정보 전송하거나 저장하는 로직 작성 가능
     console.log({
-      name, birth, phone, email, address, preferences
+      firstName,
+      lastName,
+      nickname,
+      email,
+      password,
+      preferences
     });
     alert('회원가입이 완료되었습니다!');
-    navigation.navigate('LoginMain'); // 회원가입 끝나면 로그인 메인 페이지로 이동
+    navigation.navigate('MyPage');
   };
 
   return (
     <Container>
-      <Header 
-        title="회원가입" 
+      <Header
+        title="회원가입"
         canGoBack={true}
         onBackPress={() => navigation.goBack()}
       />
 
       <ScrollView contentContainerStyle={styles.container}>
         {step === 1 ? (
-          // 개인정보 입력 화면
           <>
             <Text style={styles.title}>개인정보 입력</Text>
 
+            <View style={styles.nameContainer}>
+              <TextInput
+                placeholder="성"
+                value={firstName}
+                onChangeText={setFirstName}
+                style={[styles.input, { width: '48%' }]} // width를 48%로 설정하여 간격 좁힘
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <TextInput
+                placeholder="이름"
+                value={lastName}
+                onChangeText={setLastName}
+                style={[styles.input, { width: '48%' }]} // width를 48%로 설정하여 간격 좁힘
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+            </View>
+
             <TextInput
-              placeholder="이름"
-              value={name}
-              onChangeText={setName}
+              placeholder="닉네임"
+              value={nickname}
+              onChangeText={setNickname}
               style={styles.input}
-            />
-            <TextInput
-              placeholder="생년월일 (YYYY-MM-DD)"
-              value={birth}
-              onChangeText={setBirth}
-              style={styles.input}
-            />
-            <TextInput
-              placeholder="전화번호"
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-              style={styles.input}
+              autoCapitalize="none"
+              autoCorrect={false}
             />
             <TextInput
               placeholder="이메일"
@@ -93,12 +119,17 @@ export default function SignUpScreen({ navigation }) {
               onChangeText={setEmail}
               keyboardType="email-address"
               style={styles.input}
+              autoCapitalize="none"
+              autoCorrect={false}
             />
             <TextInput
-              placeholder="주소"
-              value={address}
-              onChangeText={setAddress}
+              placeholder="비밀번호"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
               style={styles.input}
+              autoCapitalize="none"
+              autoCorrect={false}
             />
 
             <TouchableOpacity style={styles.button} onPress={handleNext}>
@@ -106,7 +137,6 @@ export default function SignUpScreen({ navigation }) {
             </TouchableOpacity>
           </>
         ) : (
-          // 선호도 선택 화면
           <>
             <Text style={styles.title}>선호도 선택</Text>
 
@@ -114,7 +144,7 @@ export default function SignUpScreen({ navigation }) {
               <View key={tag} style={styles.preferenceItem}>
                 <Text style={styles.preferenceLabel}>{tag}</Text>
                 <View style={styles.scoreContainer}>
-                  {[1,2,3,4,5].map(score => (
+                  {[1, 2, 3, 4, 5].map(score => (
                     <TouchableOpacity
                       key={score}
                       style={[
@@ -173,6 +203,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
     fontWeight: 'bold',
+  },
+  nameContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 15,
   },
   preferenceItem: {
     marginBottom: 20,
