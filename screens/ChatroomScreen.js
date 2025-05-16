@@ -4,7 +4,8 @@ import { Client } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { useRoute } from '@react-navigation/native';
 import { useNavigation } from '@react-navigation/native';
-import Header from '../components/Header'; // 헤더 컴포넌트 임포트
+import Header from '../components/Header'; // 헤더 컴포넌트 
+import SideMenuDrawer from '../components/SideMenuDrawer';
 
 export default function ChatRoomScreen() {
   const route = useRoute();
@@ -16,7 +17,7 @@ export default function ChatRoomScreen() {
   const navigation = useNavigation();
   
   useEffect(() => {
-    const socket = new SockJS('http://172.31.57.17:8080/ws');
+    const socket = new SockJS('http://192.168.25.3:8080/ws');
     const stompClient = new Client({
       webSocketFactory: () => socket,
       onConnect: () => {
@@ -70,7 +71,13 @@ export default function ChatRoomScreen() {
         onBackPress={() => navigation.goBack()}
         onMenuPress={() => setMenuVisible(true)}
       />
-
+      <SideMenuDrawer
+                          isVisible={isMenuVisible}
+                          onClose={() => setMenuVisible(false)}
+                          onLoginPress={() => 
+                          navigation.navigate('LoginMain')
+                          }
+                        />
       {/* ✅ 채팅방 타이틀 표시 */}
       <View style={styles.titleContainer}>
         <Text style={styles.titleText}>{title}</Text>

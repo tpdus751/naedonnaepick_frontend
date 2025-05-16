@@ -4,21 +4,23 @@ import styled from 'styled-components/native';
 import Header from '../components/Header';
 import axios from 'axios';
 import { useNavigation } from '@react-navigation/native';
+import SideMenuDrawer from '../components/SideMenuDrawer';
 
 export default function ChatroomScreen() {
   const [chatRooms, setChatRooms] = useState([]);
   const navigation = useNavigation();
+  const [isMenuVisible, setMenuVisible] = useState(false);
 
   // 채팅방 목록 조회
   useEffect(() => {
-    axios.get('http://192.168.25.7:8080/api/chat/chatrooms')
+    axios.get('http://192.168.25.3:8080/api/chat/chatrooms')
       .then(response => setChatRooms(response.data))
       .catch(error => console.error('채팅방 목록 조회 실패:', error));
   }, []);
 
   // 채팅방 입장 요청
   const handleEnterRoom = (roomNo, title) => {
-    axios.post('http://192.168.25.7:8080/api/chat/enter', {
+    axios.post('http://192.168.25.3:8080/api/chat/enter', {
       roomNo: roomNo,
       userId: 'testUser',  // 실제 사용자 아이디 적용
     })
@@ -48,8 +50,15 @@ export default function ChatroomScreen() {
       <Header 
         title="내돈내픽"
         canGoBack={false}
-        onMenuPress={() => Alert.alert('메뉴 버튼 클릭')}
+        onMenuPress={() => setMenuVisible(true)}
       />
+      <SideMenuDrawer
+                    isVisible={isMenuVisible}
+                    onClose={() => setMenuVisible(false)}
+                    onLoginPress={() => 
+                      navigation.navigate('LoginMain')
+                    }
+                  />
       <ScreenTitle>성남시 채팅방 목록</ScreenTitle>
       <FlatList
         data={chatRooms}
