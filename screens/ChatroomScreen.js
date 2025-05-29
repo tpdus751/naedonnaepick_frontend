@@ -19,14 +19,14 @@ export default function ChatRoomScreen() {
   const navigation = useNavigation();
 
   useEffect(() => {
-    axios.get(`http://192.168.25.3:8080/api/chat/history/${roomNo}`)
+    axios.get(`http://172.31.57.31:8080/api/chat/history/${roomNo}`)
       .then((response) => {
         const sortedMessages = response.data.sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at));
         setMessages(sortedMessages);
       })
       .catch((error) => console.error('채팅 내역 불러오기 실패:', error));
 
-    const socket = new SockJS('http://192.168.25.3:8080/ws');
+    const socket = new SockJS('http://172.31.57.31:8080/ws');
     const stompClient = new Client({
       webSocketFactory: () => socket,
       onConnect: () => {
