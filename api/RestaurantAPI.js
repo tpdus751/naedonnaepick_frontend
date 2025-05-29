@@ -71,6 +71,6 @@ export const fetchRestaurants = async () => {
           createTags({ 달콤함: 4, 분위기: 5, 가성비: 3 })
         ),
       ]);
-    }, 1000); // 1초 지연 후 데이터 반환
+    }); // 1초 지연 후 데이터 반환
   });
 };

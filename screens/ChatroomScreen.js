@@ -12,7 +12,7 @@ export default function ChatRoomScreen() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [client, setClient] = useState(null);
-  const senderId = 'seyeon'; // 본인 사용자 ID (나중에 실제 사용자 정보로 교체)
+  const senderId = 'jisoo'; // 본인 사용자 ID (나중에 실제 사용자 정보로 교체)
   const navigation = useNavigation();
   
   useEffect(() => {

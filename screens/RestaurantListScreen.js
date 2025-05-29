@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
 import { SafeAreaView } from 'react-native';
 import Header from '../components/Header';
@@ -15,28 +15,24 @@ const RestaurantListScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
 
-  // 네비게이션으로 전달된 필터링된 음식점 데이터
-  const { restaurants } = route.params;
+  const restaurants = route.params?.restaurants || []; // 데이터 확인, 없으면 빈 배열 반환
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
       style={styles.card}
-      onPress={() => navigation.navigate('RestaurantDetailScreen', { restaurant: item })}
+      onPress={() =>
+        navigation.navigate('RestaurantDetailScreen', {
+          restaurant: item,
+        })
+      }
     >
-      {item.image ? (
-        <Image source={item.image} style={styles.image} />
-      ) : (
-        <View style={styles.placeholderImage}>
-          <Text style={styles.placeholderText}>이미지 없음</Text>
-        </View>
-      )}
       <View style={styles.info}>
-        <Text style={styles.title}>{item.name}</Text>
-        <Text style={styles.description}>{item.description}</Text>
-        <Text style={styles.price}>
-          ₩{item.priceRange[0].toLocaleString()} - ₩{item.priceRange[1].toLocaleString()}
+        <Text style={styles.title}>{item.name || '이름 없음'}</Text>
+        <Text style={styles.description}>{item.address || '주소 없음'}</Text>
+        <Text style={styles.category}>{item.category || '카테고리 없음'}</Text>
+        <Text style={styles.phoneNumber}>
+          연락처: {item.phoneNumber || '연락처 없음'}
         </Text>
-        <Text style={styles.location}>위치: {item.location}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -59,7 +55,7 @@ const RestaurantListScreen = () => {
       <FlatList
         data={restaurants}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id ? item.id.toString() : String(Math.random())}
         contentContainerStyle={{ padding: 16 }}
       />
     </Container>
@@ -77,53 +73,34 @@ const styles = StyleSheet.create({
     color: '#777',
   },
   card: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     backgroundColor: '#f9f9f9',
     borderRadius: 12,
     marginBottom: 16,
-    overflow: 'hidden',
+    padding: 16,
     elevation: 2,
-    alignItems: 'center',
-  },
-  image: {
-    width: 100,
-    height: 100,
-    borderTopLeftRadius: 12,
-    borderBottomLeftRadius: 12,
-  },
-  placeholderImage: {
-    width: 100,
-    height: 100,
-    backgroundColor: '#ddd',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  placeholderText: {
-    color: '#888',
-    fontSize: 12,
   },
   info: {
     flex: 1,
-    paddingHorizontal: 12,
   },
   title: {
     fontSize: 16,
     fontWeight: 'bold',
+    marginBottom: 4,
   },
   description: {
-    marginTop: 4,
     fontSize: 13,
     color: '#555',
+    marginBottom: 4,
   },
-  price: {
-    marginTop: 4,
+  category: {
+    fontSize: 12,
+    color: '#333',
+    marginBottom: 4,
+  },
+  phoneNumber: {
     fontSize: 12,
     color: '#007AFF',
-  },
-  location: {
-    marginTop: 4,
-    fontSize: 12,
-    color: '#777',
   },
 });
 

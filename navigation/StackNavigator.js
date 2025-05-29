@@ -36,6 +36,7 @@ export default function StackNavigator() {
 
       <Stack.Screen name="RestaurantListScreen" component={RestaurantListScreen} />
 
+      <Stack.Screen name="ChatroomScreen" component={ChatroomScreen} />
     </Stack.Navigator>
   );
 }
