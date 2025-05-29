@@ -1,124 +1,107 @@
-// RestaurantListScreen.js
 import React from 'react';
-import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity } from 'react-native';
 import styled from 'styled-components/native';
 import { SafeAreaView } from 'react-native';
 import Header from '../components/Header';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 const Container = styled(SafeAreaView)`
   flex: 1;
   background-color: #fff;
   padding: 20px;
 `;
-const restaurantData = [
-  {
-    id: '1',
-    name: '카산도',
-    description: '카츠 , 카레 ,산도가 맛있는 나만의 섬 카산도에 여러분을 초대합니다.',
-    image: require('../imgs/음식점 1.jpg'),
-  },
-  {
-    id: '2',
-    name: '돌판 하나',
-    description: '대한민국 상위 1프로 지례 흑돼지를 취급하고 있습니다',
-    image: require('../imgs/음식점 2.jpg'),
-  },
-  {
-    id: '3',
-    name: '갓 잇',
-    description: '줄 서서 먹는 타코 맛집 갓잇 분당정자점입니다.',
-    image: require('../imgs/음식점 3.jpg'),
-  }
-];
 
 const RestaurantListScreen = () => {
   const navigation = useNavigation();
+  const route = useRoute();
+
+  const restaurants = route.params?.restaurants || []; // 데이터 확인, 없으면 빈 배열 반환
 
   const renderItem = ({ item }) => (
-    <TouchableOpacity style={styles.card} onPress={() => navigation.navigate('RestaurantDetailScreen')}>
-      {item.image ? (
-        <Image source={item.image} style={styles.image}/>
-      ) : (
-        <View style={styles.placeholderImage}>
-          <Text style={styles.placeholderText}>이미지 없음</Text>
-        </View>
-      )}
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() =>
+        navigation.navigate('RestaurantDetailScreen', {
+          restaurant: item,
+        })
+      }
+    >
       <View style={styles.info}>
-        <Text style={styles.title}>{item.name}</Text>
-        <Text style={styles.description}>{item.description}</Text>
+        <Text style={styles.title}>{item.name || '이름 없음'}</Text>
+        <Text style={styles.description}>{item.address || '주소 없음'}</Text>
+        <Text style={styles.category}>{item.category || '카테고리 없음'}</Text>
+        <Text style={styles.phoneNumber}>
+          연락처: {item.phoneNumber || '연락처 없음'}
+        </Text>
       </View>
     </TouchableOpacity>
   );
-  
+
+  if (!restaurants || restaurants.length === 0) {
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>검색 결과가 없습니다.</Text>
+      </View>
+    );
+  }
 
   return (
     <Container>
-      <Header 
-        title="내돈내픽"  
+      <Header
+        title="음식점 리스트"
         canGoBack={true}
         onBackPress={() => navigation.goBack()}
-        onMenuPress={() => setMenuVisible(true)}
-      /> 
-      <View style={styles.container}>
-        <FlatList
-          data={restaurantData}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ padding: 16 }}
-          />
-      </View>
+      />
+      <FlatList
+        data={restaurants}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id ? item.id.toString() : String(Math.random())}
+        contentContainerStyle={{ padding: 16 }}
+      />
     </Container>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  emptyContainer: {
     flex: 1,
-    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 18,
+    color: '#777',
   },
   card: {
-    flexDirection: 'row', // 이미지와 텍스트를 나란히
+    flexDirection: 'column',
     backgroundColor: '#f9f9f9',
     borderRadius: 12,
     marginBottom: 16,
-    overflow: 'hidden',
+    padding: 16,
     elevation: 2,
-    alignItems: 'center',
-  },
-  image: {
-    width: 100, // 이미지 너비를 절반 이하로
-    height: 100,
-    borderTopLeftRadius: 12,
-    borderBottomLeftRadius: 12,
-  },
-  placeholderImage: {
-    width: 100,
-    height: 100,
-    backgroundColor: '#ddd',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderTopLeftRadius: 12,
-    borderBottomLeftRadius: 12,
-  },
-  placeholderText: {
-    color: '#888',
-    fontSize: 12,
   },
   info: {
     flex: 1,
-    paddingHorizontal: 12,
   },
   title: {
     fontSize: 16,
     fontWeight: 'bold',
+    marginBottom: 4,
   },
   description: {
-    marginTop: 4,
     fontSize: 13,
     color: '#555',
+    marginBottom: 4,
+  },
+  category: {
+    fontSize: 12,
+    color: '#333',
+    marginBottom: 4,
+  },
+  phoneNumber: {
+    fontSize: 12,
+    color: '#007AFF',
   },
 });
-
 
 export default RestaurantListScreen;
