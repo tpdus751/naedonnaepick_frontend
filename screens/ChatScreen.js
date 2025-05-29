@@ -15,7 +15,11 @@ export default function ChatroomScreen() {
 
   // 채팅방 목록 조회
   useEffect(() => {
+<<<<<<< HEAD
     axios.get('http://172.31.57.26:8080/api/chat/chatrooms')
+=======
+    axios.get('http://172.31.57.31:8080/api/chat/chatrooms')
+>>>>>>> b06cab945da9e059da723cdd5bc2e0b2e77ffb4b
       .then(response => {
         console.log('채팅방 목록:', response.data);  // ✅ 목록 출력 추가
         setChatRooms(response.data);
@@ -26,7 +30,11 @@ export default function ChatroomScreen() {
 
   // 채팅방 입장 요청
   const handleEnterRoom = (roomNo, title) => {
+<<<<<<< HEAD
     axios.post('http://172.31.57.26:8080/api/chat/enter', {
+=======
+    axios.post('http://172.31.57.31:8080/api/chat/enter', {
+>>>>>>> b06cab945da9e059da723cdd5bc2e0b2e77ffb4b
       roomNo: roomNo,
       userId: 'seyeon@naver.com',  // 실제 사용자 아이디 적용
     })
