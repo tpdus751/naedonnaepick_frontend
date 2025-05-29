@@ -36,16 +36,7 @@ export default function StackNavigator() {
       <Stack.Screen name="RestaurantDetailScreen" component={RestaurantDetailScreen} />
 
       <Stack.Screen name="ChatroomScreen" component={ChatroomScreen} />
-
-      <Stack.Screen name="LoginMain" component={LoginScreen} />
-
-<<<<<<< HEAD
-      <Stack.Screen name="ChatroomScreen" component={ChatroomScreen} />
-
-      <Stack.Screen name="MyPage" component={MyPageScreen} />
-
-=======
->>>>>>> b06cab945da9e059da723cdd5bc2e0b2e77ffb4b
+      
     </Stack.Navigator>
   );
 }
