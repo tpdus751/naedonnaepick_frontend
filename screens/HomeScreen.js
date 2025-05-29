@@ -25,7 +25,6 @@ export default function HomeScreen() {
         onClose={() => setMenuVisible(false)}
         onLoginPress={() => 
           navigation.navigate('LoginMain')
-          /* navigation.navigate('LoginMain'); */
         }
       />
 
@@ -34,19 +33,6 @@ export default function HomeScreen() {
       <Description>
         가격대와 선호 항목을 설정하고{'\n'}나에게 맞는 음식점을 추천 받아보세요....
       </Description>
-
-      {/* 버튼 3개 */}
-      <ButtonContainer>
-        <MainButton onPress={() => navigation.navigate('Detail')}>
-          <ButtonText>음식점 검색</ButtonText>
-        </MainButton>
-        <MainButton onPress={() => navigation.navigate('Detail')}>
-          <ButtonText>예산 관리</ButtonText>
-        </MainButton>
-        <MainButton onPress={() => navigation.navigate('Detail')}>
-          <ButtonText>채팅방 가기</ButtonText>
-        </MainButton>
-      </ButtonContainer>
 
       {/* 예산 + 위치 정보 */}
       <InfoText>내 예산: 33,000원</InfoText>

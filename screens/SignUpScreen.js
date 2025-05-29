@@ -1,83 +1,105 @@
 // screens/SignUpScreen.js
+
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
+  ScrollView,
+  Alert,
+} from 'react-native';
 import styled from 'styled-components/native';
+import { useNavigation } from '@react-navigation/native';
 import Header from '../components/Header';
 
-export default function SignUpScreen({ navigation }) {
+export default function SignUpScreen() {
+  const navigation = useNavigation();
   const [step, setStep] = useState(1);
 
-  // 개인정보 입력 상태
+  // 1단계: 개인정보
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [nickname, setNickname] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // 선호도 입력 상태
+  // 2단계: 선호도 점수
   const preferenceTags = [
-    '매운맛', '가성비', '친절함', '청결함', '분위기', '양 많음', '맛집',
-    '웨이팅 있음', '달콤함', '짭짤함', '고소함', '신선함', '혼밥 가능', '트렌디함', '주차 편의성'
+    '매운맛','가성비','친절함','청결함','분위기','양 많음','맛집',
+    '웨이팅 있음','달콤함','짭짤함','고소함','신선함','혼밥 가능','트렌디함','주차 편의성'
   ];
   const [preferences, setPreferences] = useState(
-    preferenceTags.reduce((acc, tag) => {
-      acc[tag] = 3;
-      return acc;
-    }, {})
+    preferenceTags.reduce((acc, tag) => ({ ...acc, [tag]: 3 }), {})
   );
 
   const handlePreferenceChange = (tag, value) => {
-    setPreferences(prev => ({
-      ...prev,
-      [tag]: value
-    }));
+    setPreferences(prev => ({ ...prev, [tag]: value }));
   };
 
   const handleNext = () => {
     if (!firstName || !lastName || !nickname || !email || !password) {
-      alert('모든 항목을 입력해주세요.');
+      Alert.alert('모든 항목을 입력해주세요.');
       return;
     }
-
     const nameRegex = /^[A-Za-z]+$/;
     if (!nameRegex.test(firstName) || !nameRegex.test(lastName)) {
-      alert('이름은 영어로 입력해야 합니다.');
+      Alert.alert('이름은 영어로 입력해야 합니다.');
       return;
     }
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      alert('유효한 이메일 주소를 입력해주세요.');
+      Alert.alert('유효한 이메일 주소를 입력해주세요.');
       return;
     }
-
     const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/;
     if (!passwordRegex.test(password)) {
-      alert('비밀번호는 영문자와 숫자를 포함한 8자 이상이어야 합니다.');
+      Alert.alert('비밀번호는 영문자와 숫자를 포함한 8자 이상이어야 합니다.');
       return;
     }
-
     setStep(2);
   };
 
-  const handleSubmit = () => {
-    console.log({
+  const handleSubmit = async () => {
+    const payload = {
+      email,
+      password,
       firstName,
       lastName,
       nickname,
-      email,
-      password,
-      preferences
-    });
-    alert('회원가입이 완료되었습니다!');
-    navigation.navigate('MyPage');
+      preferences   // JSON object of tag→score
+    };
+
+    try {
+      const res = await fetch('http://localhost:8080/api/users/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(err || `HTTP ${res.status}`);
+      }
+
+      Alert.alert('회원가입이 완료되었습니다!');
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'LoginMain', params: { welcome: true } }],
+      });
+    } catch (e) {
+      console.error(e);
+      Alert.alert('회원가입 실패', e.message);
+    }
   };
 
   return (
     <Container>
       <Header
         title="회원가입"
-        canGoBack={true}
+        canGoBack
         onBackPress={() => navigation.goBack()}
       />
 
@@ -85,33 +107,28 @@ export default function SignUpScreen({ navigation }) {
         {step === 1 ? (
           <>
             <Text style={styles.title}>개인정보 입력</Text>
-
             <View style={styles.nameContainer}>
               <TextInput
                 placeholder="성"
                 value={firstName}
                 onChangeText={setFirstName}
-                style={[styles.input, { width: '48%' }]} // width를 48%로 설정하여 간격 좁힘
+                style={[styles.input, { width: '48%' }]}
                 autoCapitalize="none"
-                autoCorrect={false}
               />
               <TextInput
                 placeholder="이름"
                 value={lastName}
                 onChangeText={setLastName}
-                style={[styles.input, { width: '48%' }]} // width를 48%로 설정하여 간격 좁힘
+                style={[styles.input, { width: '48%' }]}
                 autoCapitalize="none"
-                autoCorrect={false}
               />
             </View>
-
             <TextInput
               placeholder="닉네임"
               value={nickname}
               onChangeText={setNickname}
               style={styles.input}
               autoCapitalize="none"
-              autoCorrect={false}
             />
             <TextInput
               placeholder="이메일"
@@ -120,7 +137,6 @@ export default function SignUpScreen({ navigation }) {
               keyboardType="email-address"
               style={styles.input}
               autoCapitalize="none"
-              autoCorrect={false}
             />
             <TextInput
               placeholder="비밀번호"
@@ -129,9 +145,7 @@ export default function SignUpScreen({ navigation }) {
               secureTextEntry
               style={styles.input}
               autoCapitalize="none"
-              autoCorrect={false}
             />
-
             <TouchableOpacity style={styles.button} onPress={handleNext}>
               <Text style={styles.buttonText}>다음</Text>
             </TouchableOpacity>
@@ -139,12 +153,11 @@ export default function SignUpScreen({ navigation }) {
         ) : (
           <>
             <Text style={styles.title}>선호도 선택</Text>
-
-            {preferenceTags.map((tag) => (
+            {preferenceTags.map(tag => (
               <View key={tag} style={styles.preferenceItem}>
                 <Text style={styles.preferenceLabel}>{tag}</Text>
                 <View style={styles.scoreContainer}>
-                  {[1, 2, 3, 4, 5].map(score => (
+                  {[1,2,3,4,5].map(score => (
                     <TouchableOpacity
                       key={score}
                       style={[
@@ -159,7 +172,6 @@ export default function SignUpScreen({ navigation }) {
                 </View>
               </View>
             ))}
-
             <TouchableOpacity style={styles.button} onPress={handleSubmit}>
               <Text style={styles.buttonText}>회원가입 완료</Text>
             </TouchableOpacity>
@@ -186,6 +198,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     alignSelf: 'center',
   },
+  nameContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+  },
   input: {
     borderWidth: 1,
     borderColor: '#ddd',
@@ -197,17 +214,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
     padding: 15,
     borderRadius: 5,
-    marginTop: 20,
+    marginTop: 10,
   },
   buttonText: {
     color: '#fff',
     textAlign: 'center',
     fontWeight: 'bold',
-  },
-  nameContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 15,
   },
   preferenceItem: {
     marginBottom: 20,

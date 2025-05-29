@@ -1,10 +1,11 @@
 // screens/BudgetScreen.js
-import React from 'react';
+import React, {useNavigation} from 'react';
 import { View, Text, SafeAreaView } from 'react-native';
 import styled from 'styled-components/native';
 import Header from '../components/Header';
 
 export default function ProfileScreen() {
+
   return (
     <Container>
       <Header 
