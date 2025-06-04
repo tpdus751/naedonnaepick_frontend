@@ -1,31 +1,51 @@
-// screens/HomeScreen.js
-import React, { useState } from 'react';
-import { SafeAreaView, Image, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { SafeAreaView, Alert } from 'react-native';
 import styled from 'styled-components/native';
 import Header from '../components/Header';
-import { useNavigation } from '@react-navigation/native'; 
 import SideMenuDrawer from '../components/SideMenuDrawer';
+import { useNavigation } from '@react-navigation/native';
+import * as Location from 'expo-location';
 
 export default function HomeScreen() {
   const [isMenuVisible, setMenuVisible] = useState(false);
+  const navigation = useNavigation();
 
-  const navigation = useNavigation(); 
+  const [location, setLocation] = useState(null);
+  const [address, setAddress] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('위치 권한이 거부되었습니다.');
+        return;
+      }
+
+      let loc = await Location.getCurrentPositionAsync({});
+      setLocation(loc);
+
+      let geocode = await Location.reverseGeocodeAsync(loc.coords);
+      if (geocode.length > 0) {
+        const { region, city, district } = geocode[0];
+        setAddress(`${region} ${city} ${district}`);
+      }
+    })();
+  }, []);
 
   return (
     <Container>
-      <Header 
-        title="내돈내픽"  
+      <Header
+        title="내돈내픽"
         canGoBack={false}
         onBackPress={() => Alert.alert('뒤로가기 버튼 클릭')}
         onMenuPress={() => setMenuVisible(true)}
-      /> 
+      />
 
       <SideMenuDrawer
         isVisible={isMenuVisible}
         onClose={() => setMenuVisible(false)}
-        onLoginPress={() => 
-          navigation.navigate('LoginMain')
-        }
+        onLoginPress={() => navigation.navigate('LoginMain')}
       />
 
       {/* 상단 이미지 + 설명 */}
@@ -36,7 +56,10 @@ export default function HomeScreen() {
 
       {/* 예산 + 위치 정보 */}
       <InfoText>내 예산: 33,000원</InfoText>
-      <InfoText>내 위치: 경기도 성남시 산성동</InfoText>
+      <InfoText>
+        내 위치: {address ? address : '위치 확인 중...'}
+      </InfoText>
+      {errorMsg && <InfoText style={{ color: 'red' }}>{errorMsg}</InfoText>}
     </Container>
   );
 }
@@ -45,17 +68,6 @@ const Container = styled(SafeAreaView)`
   flex: 1;
   background-color: #fff;
   padding: 20px;
-`;
-
-const Title = styled.Text`
-  font-size: 24px;
-  font-weight: bold;
-`;
-
-const MenuButton = styled.TouchableOpacity``;
-
-const MenuText = styled.Text`
-  font-size: 24px;
 `;
 
 const Banner = styled.Image`
@@ -71,25 +83,7 @@ const Description = styled.Text`
   font-size: 16px;
   color: #333;
   margin-bottom: 24px;
-  line-height: 24px;  // ✅ 추가
-`;
-
-const ButtonContainer = styled.View`
-  gap: 12px;
-  margin-bottom: 24px;
-`;
-
-const MainButton = styled.TouchableOpacity`
-  background-color: black;
-  padding: 14px;
-  border-radius: 10px;
-  margin-top: 20px;
-`;
-
-const ButtonText = styled.Text`
-  color: white;
-  font-size: 16px;
-  text-align: center;
+  line-height: 24px;
 `;
 
 const InfoText = styled.Text`
