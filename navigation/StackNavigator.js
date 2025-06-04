@@ -13,6 +13,7 @@ import LoginScreen from '../screens/MainLoginPage';
 import RestaurantListScreen from '../screens/RestaurantListScreen';
 import RestaurantDetailScreen from '../screens/RestaurantDetailScreen';
 import ChatroomScreen from '../screens/ChatroomScreen';
+import MyPageScreen from '../screens/MyPageScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -30,14 +31,14 @@ export default function StackNavigator() {
 
       <Stack.Screen name="SignUp" component={SignUpScreen} />
 
+      <Stack.Screen name="LoginMain" component={LoginScreen} />
+
       <Stack.Screen name="RestaurantListScreen" component={RestaurantListScreen} />
 
       <Stack.Screen name="RestaurantDetailScreen" component={RestaurantDetailScreen} />
 
       <Stack.Screen name="ChatroomScreen" component={ChatroomScreen} />
-
-      <Stack.Screen name="LoginMain" component={LoginScreen} />
-
+      
     </Stack.Navigator>
   );
 }
