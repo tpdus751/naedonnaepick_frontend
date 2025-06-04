@@ -34,10 +34,10 @@ export default function StackNavigator() {
 
       <Stack.Screen name="RestaurantDetailScreen" component={RestaurantDetailScreen} />
 
+      <Stack.Screen name="ChatroomScreen" component={ChatroomScreen} />
+
       <Stack.Screen name="LoginMain" component={LoginScreen} />
 
-      <Stack.Screen name="ChatroomScreen" component={ChatroomScreen} />
-      
     </Stack.Navigator>
   );
 }
