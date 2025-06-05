@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Header from '../components/Header';
-import SideMenuDrawer from '../components/SideMenuDrawer';
 import styled from 'styled-components/native';
 
 export default function LoginScreen() {
@@ -37,7 +36,7 @@ export default function LoginScreen() {
 
     try {
       //const response = await fetch('http://10.0.2.2:8080/api/users/login', {
-      const response = await fetch('http://172.31.57.26:8080/api/users/login', {
+      const response = await fetch('http://172.31.57.17:8080/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
