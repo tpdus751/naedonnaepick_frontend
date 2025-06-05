@@ -6,7 +6,7 @@ import HomeScreen from '../screens/HomeScreen';
 import BudgetScreen from '../screens/BudgetScreen';
 import RecommendationScreen from '../screens/RecommendationScreen';
 import ChatScreen from '../screens/ChatScreen';
-import ProfileScreen from '../screens/ProfileScreen';
+import MyPageScreen from '../screens/MyPageScreen';
 import { Ionicons } from '@expo/vector-icons';
 
 const Tab = createBottomTabNavigator();
@@ -47,7 +47,7 @@ export default function BottomTabNavigator() {
         <Tab.Screen name="예산" component={BudgetScreen} />
         <Tab.Screen name="음식점" component={RecommendationScreen} />
         <Tab.Screen name="채팅" component={ChatScreen} />
-        <Tab.Screen name="마이페이지" component={ProfileScreen} />
+        <Tab.Screen name="마이페이지" component={MyPageScreen} />
       </Tab.Navigator>
   );
 }
