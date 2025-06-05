@@ -31,6 +31,8 @@ export default function StackNavigator() {
 
       <Stack.Screen name="SignUp" component={SignUpScreen} />
 
+      <Stack.Screen name="LoginMain" component={LoginScreen} />
+
       <Stack.Screen name="RestaurantListScreen" component={RestaurantListScreen} />
 
       <Stack.Screen name="RestaurantDetailScreen" component={RestaurantDetailScreen} />

@@ -28,7 +28,7 @@ export default function ChatroomScreen() {
   const handleEnterRoom = (roomNo, title) => {
     axios.post('http://172.31.57.31:8080/api/chat/enter', {
       roomNo: roomNo,
-      userId: 'seyeon@naver.com',  // 실제 사용자 아이디 적용
+      userId: 'garam@naver.com',  // 실제 사용자 아이디 적용
     })
     .then(response => {
       console.log('입장 성공:', response.data);

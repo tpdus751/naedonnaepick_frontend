@@ -8,49 +8,53 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 export default function MyPageScreen() {
   const navigation = useNavigation();
   const route = useRoute();
-  // 만약 SignUpScreen에서 user 정보를 params로 전달했다면
-  // const { firstName, lastName, nickname, email } = route.params;
 
-  // 예시 값
-  const firstName = 'Hong';
-  const lastName = 'Gildong';
-  const nickname = 'hihi';
-  const email = '1234hong@gmail.com';
+  console.log('💡 MyPage route.params:', route.params); // ← 이걸로 params 출력!
+
+  const { first_name, last_name, nickname, email } = route.params || {};
+
+  const goToHome = () => {
+    // StackNavigator의 Main (탭 네비게이터)로 완전히 초기화 이동
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Main' }],
+    });
+  };
 
   return (
     <Container>
       <Header
         title="내돈내픽"
         canGoBack={false}
-        onMenuPress={() => {/* 햄버거 메뉴 처리 */}}
+        onMenuPress={() => {/* 햄버거 메뉴 처리 */ }}
       />
 
       <ScrollView contentContainerStyle={styles.inner}>
         <Card>
           <Text style={styles.infoText}>
-            이름: {firstName}{lastName}{'\n'}
+            이름: {first_name}{last_name}{'\n'}
             닉네임: {nickname}{'\n'}
             이메일: {email}
           </Text>
         </Card>
 
-        <OptionButton onPress={() => {/* 프로필 정보 확인 */}}>
+        <OptionButton onPress={() => {/* 프로필 정보 확인 */ }}>
           <OptionText>프로필 정보 확인</OptionText>
         </OptionButton>
-        <OptionButton onPress={() => {/* 비밀번호 변경 */}}>
+        <OptionButton onPress={() => {/* 비밀번호 변경 */ }}>
           <OptionText>비밀번호 변경</OptionText>
         </OptionButton>
-        <OptionButton onPress={() => {/* 로그아웃 */}}>
+        <OptionButton onPress={() => {/* 로그아웃 */ }}>
           <OptionText>로그아웃</OptionText>
         </OptionButton>
-        <OptionButton onPress={() => {/* 공지사항 */}}>
+        <OptionButton onPress={() => {/* 공지사항 */ }}>
           <OptionText>공지사항</OptionText>
         </OptionButton>
-        <OptionButton onPress={() => {/* 앱 정보 */}}>
+        <OptionButton onPress={() => {/* 앱 정보 */ }}>
           <OptionText>앱 정보</OptionText>
         </OptionButton>
 
-        <HomeButton onPress={() => navigation.navigate('Main')}>
+        <HomeButton onPress={goToHome}>
           <HomeText>홈으로</HomeText>
         </HomeButton>
       </ScrollView>

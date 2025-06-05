@@ -29,17 +29,59 @@ export default function LoginScreen() {
   // 실제 로그인 성공 혹은 회원가입 직후일 때 환영 문구
   const isWelcome = isLoggedIn || fromSignUp;
 
-   const handleLogin = () => {
+  const handleLogin = async () => {
     if (!emailInput || !passwordInput) {
       alert('이메일과 비밀번호를 모두 입력해주세요.');
       return;
     }
-    // TODO: 실제 인증 로직
-    // 로그인 성공 처리 후 바로 홈으로
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'Main' }],
-    });
+
+    try {
+      //const response = await fetch('http://10.0.2.2:8080/api/users/login', {
+      const response = await fetch('http://172.31.57.26:8080/api/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: emailInput,
+          password: passwordInput,
+        }),
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(errText || `HTTP ${response.status}`);
+      }
+
+      const user = await response.json();
+
+      // 로그인 성공 → 마이페이지로 사용자 정보 전달
+      navigation.reset({
+        index: 0,
+        routes: [
+          {
+            name: 'Main',
+            state: {
+              routes: [
+                { name: '홈' }, // 탭 네비게이터 안의 다른 화면들도 포함 가능
+                {
+                  name: '마이페이지',
+                  params: {
+                    first_name: user.first_name,
+                    last_name: user.last_name,
+                    nickname: user.nickname,
+                    email: user.email,
+                  }
+                },
+              ],
+            },
+          },
+        ],
+      });
+    } catch (error) {
+      console.error('로그인 실패', error);
+      alert('로그인 실패: ' + error.message);
+    }
   };
 
 
@@ -49,7 +91,7 @@ export default function LoginScreen() {
         title="내돈내픽"
         canGoBack={true}
         onBackPress={() => navigation.goBack()}
-        onMenuPress={() => {}}
+        onMenuPress={() => { }}
       />
 
       <View style={styles.container}>

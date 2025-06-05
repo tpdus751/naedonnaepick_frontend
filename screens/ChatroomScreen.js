@@ -14,8 +14,8 @@ export default function ChatRoomScreen() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [client, setClient] = useState(null);
-  const nickname = '세연1234';
-  const email = 'seyeon@naver.com';
+  const nickname = '가람1234';
+  const email = 'garam@naver.com';
   const navigation = useNavigation();
 
   const [isMenuVisible, setMenuVisible] = useState(false);

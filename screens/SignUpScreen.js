@@ -20,16 +20,16 @@ export default function SignUpScreen() {
   const [step, setStep] = useState(1);
 
   // 1단계: 개인정보
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
+  const [first_name, setFirstName] = useState('');
+  const [last_name, setLastName] = useState('');
   const [nickname, setNickname] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   // 2단계: 선호도 점수
   const preferenceTags = [
-    '매운맛','가성비','친절함','청결함','분위기','양 많음','맛집',
-    '웨이팅 있음','달콤함','짭짤함','고소함','신선함','혼밥 가능','트렌디함','주차 편의성'
+    '가성비','양 많음','친절함','청결함','분위기','혼밥 가능','맛집',
+    '트렌디함','주차 편의성','웨이팅 있음','신선함','매운맛','짭짤함','달콤함','고소함'
   ];
   const [preferences, setPreferences] = useState(
     preferenceTags.reduce((acc, tag) => ({ ...acc, [tag]: 3 }), {})
@@ -40,12 +40,12 @@ export default function SignUpScreen() {
   };
 
   const handleNext = () => {
-    if (!firstName || !lastName || !nickname || !email || !password) {
+    if (!first_name || !last_name || !nickname || !email || !password) {
       Alert.alert('모든 항목을 입력해주세요.');
       return;
     }
     const nameRegex = /^[A-Za-z]+$/;
-    if (!nameRegex.test(firstName) || !nameRegex.test(lastName)) {
+    if (!nameRegex.test(first_name) || !nameRegex.test(last_name)) {
       Alert.alert('이름은 영어로 입력해야 합니다.');
       return;
     }
@@ -66,14 +66,15 @@ export default function SignUpScreen() {
     const payload = {
       email,
       password,
-      firstName,
-      lastName,
+      first_name,
+      last_name,
       nickname,
       preferences   // JSON object of tag→score
     };
 
     try {
-      const res = await fetch('http://172.31.57.31:8080/api/users/register', {
+      const res = await fetch('http://172.31.57.26:8080/api/users/register', {
+        // 에뮬레이터를 쓰고있으니까 10.0.2.2 로 로컬 호스트에 접근해야 됨
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -110,14 +111,14 @@ export default function SignUpScreen() {
             <View style={styles.nameContainer}>
               <TextInput
                 placeholder="성"
-                value={firstName}
+                value={first_name}
                 onChangeText={setFirstName}
                 style={[styles.input, { width: '48%' }]}
                 autoCapitalize="none"
               />
               <TextInput
                 placeholder="이름"
-                value={lastName}
+                value={last_name}
                 onChangeText={setLastName}
                 style={[styles.input, { width: '48%' }]}
                 autoCapitalize="none"
