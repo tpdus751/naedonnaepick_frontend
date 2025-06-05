@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Slider from '@react-native-community/slider';
+import axios from 'axios';
 import Header from '../components/Header';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -22,6 +23,26 @@ export default function BudgetSettingScreen() {
     return date.toISOString().slice(0, 10);
   };
 
+  // ✅ 서버로 데이터 전송 함수
+  const submitBudget = async () => {
+    try {
+      const response = await axios.post('http://<your-server-url>:<port>/api/budget/set', {
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+        totalBudget: budget,
+      });
+      if (response.status === 200) {
+        Alert.alert('성공', '예산이 성공적으로 설정되었습니다.');
+        navigation.goBack(); // 이전 화면으로 돌아감
+      } else {
+        Alert.alert('오류', '예산 설정 중 문제가 발생했습니다.');
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert('오류', '서버와 통신 중 문제가 발생했습니다.');
+    }
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <Header
@@ -30,15 +51,11 @@ export default function BudgetSettingScreen() {
         onBackPress={() => navigation.goBack()}
         onMenuPress={() => setMenuVisible(true)}
       />
-
       <SideMenuDrawer
-              isVisible={isMenuVisible}
-              onClose={() => setMenuVisible(false)}
-              onLoginPress={() => 
-                navigation.navigate('LoginMain')
-                /* navigation.navigate('LoginMain'); */
-              }
-            />
+        isVisible={isMenuVisible}
+        onClose={() => setMenuVisible(false)}
+        onLoginPress={() => navigation.navigate('LoginMain')}
+      />
       <View style={styles.container}>
         <Text style={styles.title}>예산설정</Text>
         <View style={styles.dateRow}>
@@ -58,13 +75,10 @@ export default function BudgetSettingScreen() {
             mode="date"
             display="default"
             onChange={(event, selectedDate) => {
-              setShowStartPicker(false); // ✅ Picker 닫기
+              setShowStartPicker(false);
               if (event.type === 'set' && selectedDate) {
                 setStartDate(selectedDate);
-                // 🔐 종료일이 앞서면 자동 조정
-                if (selectedDate > endDate) {
-                  setEndDate(selectedDate);
-                }
+                if (selectedDate > endDate) setEndDate(selectedDate); // 종료일 자동 조정
               }
             }}
           />
@@ -76,11 +90,10 @@ export default function BudgetSettingScreen() {
             mode="date"
             display="default"
             onChange={(event, selectedDate) => {
-              setShowEndPicker(false); // ✅ Picker 닫기
+              setShowEndPicker(false);
               if (event.type === 'set' && selectedDate) {
-                // 🔐 시작일보다 이전이면 안 됨
                 if (selectedDate < startDate) {
-                  alert("종료일은 시작일보다 늦어야 합니다.");
+                  Alert.alert('오류', '종료일은 시작일보다 나중이어야 합니다.');
                 } else {
                   setEndDate(selectedDate);
                 }
@@ -88,7 +101,6 @@ export default function BudgetSettingScreen() {
             }}
           />
         )}
-
 
         <View style={styles.sliderBox}>
           <Text style={styles.label}>예산설정</Text>
@@ -109,16 +121,15 @@ export default function BudgetSettingScreen() {
         <TextInput
           style={styles.input}
           value={budget.toString()}
-          onChangeText={text => setBudget(Number(text.replace(/[^0-9]/g, '')))}
+          onChangeText={(text) => setBudget(Number(text.replace(/[^0-9]/g, '')))}
           keyboardType="numeric"
           placeholder="예산 입력"
         />
 
-        <Text style={styles.notice}>
-          * 따로 설정하지 않으면 계속 이 가격으로 예산이 정해집니다.
-        </Text>
+        <Text style={styles.notice}>* 따로 설정하지 않으면 계속 이 가격으로 예산이 정해집니다.</Text>
 
-        <TouchableOpacity style={styles.confirmBtn} onPress={() => navigation.goBack()}>
+        {/* 서버로 데이터 전송 */}
+        <TouchableOpacity style={styles.confirmBtn} onPress={submitBudget}>
           <Text style={styles.confirmBtnText}>확인</Text>
         </TouchableOpacity>
       </View>

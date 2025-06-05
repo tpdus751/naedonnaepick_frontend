@@ -14,8 +14,8 @@ export default function ChatRoomScreen() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [client, setClient] = useState(null);
-  const nickname = '세연1234';
-  const email = 'seyeon@naver.com';
+  const nickname = '지수1234';
+  const email = 'jisoo@naver.com';
   const navigation = useNavigation();
 
   const [isMenuVisible, setMenuVisible] = useState(false);
@@ -36,7 +36,7 @@ export default function ChatRoomScreen() {
       })
       .catch((error) => console.error('채팅 내역 불러오기 실패:', error));
 
-    const socket = new SockJS('http://192.168.25.3:8080/ws');
+    const socket = new SockJS('http://172.31.57.31:8080/ws');
     const stompClient = new Client({
       webSocketFactory: () => socket,
       onConnect: () => {
