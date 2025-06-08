@@ -12,7 +12,7 @@ const RestaurantDetailScreen = () => {
   useEffect(() => {
     const fetchMenus = async () => {
       try {
-        const response = await axios.get('http://172.31.57.31:8080/api/restaurant/menus', {
+        const response = await axios.get('http://192.168.25.9:8080/api/restaurant/menus', {
           params: { restaurantNo: restaurant.restaurantNo },
         });
         setMenus(response.data);

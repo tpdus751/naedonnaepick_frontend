@@ -29,14 +29,14 @@ export default function ChatRoomScreen() {
 
 
   useEffect(() => {
-    axios.get(`http://172.31.57.31:8080/api/chat/history/${roomNo}`)
+    axios.get(`http://192.168.25.9:8080/api/chat/history/${roomNo}`)
       .then((response) => {
         const sortedMessages = response.data.sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at));
         setMessages(sortedMessages);
       })
       .catch((error) => console.error('채팅 내역 불러오기 실패:', error));
 
-    const socket = new SockJS('http://192.168.25.3:8080/ws');
+    const socket = new SockJS('http://192.168.25.9:8080/ws');
     const stompClient = new Client({
       webSocketFactory: () => socket,
       onConnect: () => {
@@ -200,24 +200,41 @@ export default function ChatRoomScreen() {
 
 
             <TouchableOpacity
-              style={styles.submitButton}
-              onPress={() => {
-                const finalReason = reportReason === '기타' ? reportDetail.trim() : reportReason;
+            style={styles.submitButton}
+            onPress={() => {
+              const finalReason = reportReason === '기타' ? reportDetail.trim() : reportReason;
 
-                if (finalReason.length > 255) {
-                  alert('신고 사유는 255자 이내여야 합니다.');
-                  return;
-                }
+              if (finalReason.length > 255) {
+                alert('신고 사유는 255자 이내여야 합니다.');
+                return;
+              }
 
-                console.log(`신고 대상: ${reportTarget.nickname} - ${reportTarget.email}`);
-                console.log(`신고 메시지: ${reportTarget.content}`);
-                console.log(`신고 사유: ${finalReason}`);
-                setReportModalVisible(false);
-              }}
-              disabled={!reportReason || (reportReason === '기타' && !reportDetail.trim())}
-            >
-              <Text style={styles.submitButtonText}>신고</Text>
-            </TouchableOpacity>
+              // 1. 모달 닫기
+              setReportModalVisible(false);
+
+              // 2. 서버로 신고 정보 전송
+              axios.post('http://192.168.40.47:8080/api/chat/report', {
+                reporter_email: email,  // 현재 사용자 이메일
+                reported_email: reportTarget.email,  // 신고 대상 이메일
+                reason: finalReason  // 신고 사유
+              })
+              .then(() => {
+                alert('신고가 접수되었습니다.');
+              })
+              .catch((error) => {
+                console.error('신고 실패:', error);
+                alert('신고 처리 중 오류가 발생했습니다.');
+              });
+
+              // 콘솔 디버깅용 로그 (필요시 유지)
+              console.log(`신고 대상: ${reportTarget.nickname} - ${reportTarget.email}`);
+              console.log(`신고 메시지: ${reportTarget.content}`);
+              console.log(`신고 사유: ${finalReason}`);
+            }}
+            disabled={!reportReason || (reportReason === '기타' && !reportDetail.trim())}
+          >
+            <Text style={styles.submitButtonText}>신고</Text>
+          </TouchableOpacity>
 
 
 

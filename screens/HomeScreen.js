@@ -1,15 +1,40 @@
 // screens/HomeScreen.js
-import React, { useState } from 'react';
-import { SafeAreaView, Image, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { SafeAreaView, Alert } from 'react-native';
 import styled from 'styled-components/native';
 import Header from '../components/Header';
 import { useNavigation } from '@react-navigation/native'; 
 import SideMenuDrawer from '../components/SideMenuDrawer';
+import * as Location from 'expo-location';  // ✅ 위치 기능 추가
 
 export default function HomeScreen() {
   const [isMenuVisible, setMenuVisible] = useState(false);
-
+  const [address, setAddress] = useState('위치 불러오는 중...');  // ✅ 초기값
   const navigation = useNavigation(); 
+
+  // ✅ 위치 가져오기
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setAddress('위치 권한 거부됨');
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({});
+      const [geo] = await Location.reverseGeocodeAsync(location.coords);
+
+      // ✅ 주소 포맷 정리
+      if (geo) {
+        const region = geo.region || '';
+        const city = geo.city || '';
+        const district = geo.district || '';
+        setAddress(`${region} ${city} ${district}`);
+      } else {
+        setAddress('주소 정보 없음');
+      }
+    })();
+  }, []);
 
   return (
     <Container>
@@ -23,9 +48,7 @@ export default function HomeScreen() {
       <SideMenuDrawer
         isVisible={isMenuVisible}
         onClose={() => setMenuVisible(false)}
-        onLoginPress={() => 
-          navigation.navigate('LoginMain')
-        }
+        onLoginPress={() => navigation.navigate('LoginMain')}
       />
 
       {/* 상단 이미지 + 설명 */}
@@ -36,7 +59,7 @@ export default function HomeScreen() {
 
       {/* 예산 + 위치 정보 */}
       <InfoText>내 예산: 33,000원</InfoText>
-      <InfoText>내 위치: 경기도 성남시 산성동</InfoText>
+      <InfoText>내 위치: {address}</InfoText>
     </Container>
   );
 }
@@ -45,17 +68,6 @@ const Container = styled(SafeAreaView)`
   flex: 1;
   background-color: #fff;
   padding: 20px;
-`;
-
-const Title = styled.Text`
-  font-size: 24px;
-  font-weight: bold;
-`;
-
-const MenuButton = styled.TouchableOpacity``;
-
-const MenuText = styled.Text`
-  font-size: 24px;
 `;
 
 const Banner = styled.Image`
@@ -71,25 +83,7 @@ const Description = styled.Text`
   font-size: 16px;
   color: #333;
   margin-bottom: 24px;
-  line-height: 24px;  // ✅ 추가
-`;
-
-const ButtonContainer = styled.View`
-  gap: 12px;
-  margin-bottom: 24px;
-`;
-
-const MainButton = styled.TouchableOpacity`
-  background-color: black;
-  padding: 14px;
-  border-radius: 10px;
-  margin-top: 20px;
-`;
-
-const ButtonText = styled.Text`
-  color: white;
-  font-size: 16px;
-  text-align: center;
+  line-height: 24px;
 `;
 
 const InfoText = styled.Text`
