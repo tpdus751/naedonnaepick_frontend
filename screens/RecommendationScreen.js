@@ -31,7 +31,7 @@ const handleSearch = async () => {
   }
 
   try {
-    const response = await axios.get('http://192.168.25.9:8080/api/restaurant/recommended', {
+    const response = await axios.get('http://192.168.25.6:8080/api/restaurant/recommended', {
       params: {
         location,
         minPrice: priceRange[0],

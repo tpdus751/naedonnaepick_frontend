@@ -1,5 +1,4 @@
 // navigation/StackNavigator.js
-import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import BottomTabNavigator from './BottomTabNavigator';
 
@@ -13,6 +12,8 @@ import LoginScreen from '../screens/MainLoginPage';
 import RestaurantListScreen from '../screens/RestaurantListScreen';
 import RestaurantDetailScreen from '../screens/RestaurantDetailScreen';
 import ChatroomScreen from '../screens/ChatroomScreen';
+import NearbyListScreen from '../screens/NearByListScreen';
+import SearchResultScreen from '../screens/SearchResultScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -30,14 +31,18 @@ export default function StackNavigator() {
 
       <Stack.Screen name="SignUp" component={SignUpScreen} />
 
+      <Stack.Screen name="LoginMain" component={LoginScreen} />
+
       <Stack.Screen name="RestaurantListScreen" component={RestaurantListScreen} />
 
       <Stack.Screen name="RestaurantDetailScreen" component={RestaurantDetailScreen} />
 
       <Stack.Screen name="ChatroomScreen" component={ChatroomScreen} />
 
-      <Stack.Screen name="LoginMain" component={LoginScreen} />
+      <Stack.Screen name="SearchResultScreen" component={SearchResultScreen} />
 
+      <Stack.Screen name="NearbyListScreen" component={NearbyListScreen} />
+      
     </Stack.Navigator>
   );
 }

@@ -1,93 +1,129 @@
 // screens/HomeScreen.js
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, Alert } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { ActivityIndicator, Alert, FlatList, RefreshControl } from 'react-native';
 import styled from 'styled-components/native';
+import * as Location from 'expo-location';
+import { useNavigation } from '@react-navigation/native';
 import Header from '../components/Header';
-import { useNavigation } from '@react-navigation/native'; 
-import SideMenuDrawer from '../components/SideMenuDrawer';
-import * as Location from 'expo-location';  // ✅ 위치 기능 추가
+import TagList from '../components/TagList';
+import RestaurantCard from '../components/RestaurantCard';
+import { getDistrictName } from '../utils/locationUtils';
 
 export default function HomeScreen() {
-  const [isMenuVisible, setMenuVisible] = useState(false);
-  const [address, setAddress] = useState('위치 불러오는 중...');  // ✅ 초기값
-  const navigation = useNavigation(); 
+  const navigation = useNavigation();
 
-  // ✅ 위치 가져오기
-  useEffect(() => {
-    (async () => {
+  const [location, setLocation] = useState(null);
+  const [address, setAddress] = useState('');
+  const [restaurants, setRestaurants] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  // 📍 위치 가져오기
+  const fetchLocation = useCallback(async () => {
+    try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        setAddress('위치 권한 거부됨');
+        Alert.alert('위치 권한 거부됨', '앱 사용을 위해 위치 권한이 필요합니다.');
         return;
       }
 
-      const location = await Location.getCurrentPositionAsync({});
-      const [geo] = await Location.reverseGeocodeAsync(location.coords);
+      const loc = await Location.getCurrentPositionAsync({});
+      setLocation(loc.coords);
 
-      // ✅ 주소 포맷 정리
-      if (geo) {
-        const region = geo.region || '';
-        const city = geo.city || '';
-        const district = geo.district || '';
-        setAddress(`${region} ${city} ${district}`);
-      } else {
-        setAddress('주소 정보 없음');
-      }
+      const [addr] = await Location.reverseGeocodeAsync(loc.coords);
+      const district = getDistrictName(addr);
+      setAddress(district);
+    } catch (error) {
+      console.error('위치 정보 오류:', error);
+      Alert.alert('오류', '위치 정보를 가져오는 중 문제가 발생했습니다.');
+    }
+  }, []);
+
+  // 🍽️ 음식점 가져오기
+  const fetchNearbyRestaurants = useCallback(async () => {
+    if (!location) return;
+
+    try {
+      const res = await fetch(
+        `http://192.168.25.6:8080/api/restaurant/nearby?lat=${location.latitude}&lng=${location.longitude}`
+      );
+      const data = await res.json();
+      setRestaurants(data);
+    } catch (err) {
+      console.error('🍽️ 가까운 음식점 가져오기 오류:', err);
+      Alert.alert('오류', '음식점을 불러오는 중 문제가 발생했습니다.');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [location]);
+
+  // 🔁 새로고침
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchLocation();
+    await fetchNearbyRestaurants();
+  };
+
+  useEffect(() => {
+    (async () => {
+      await fetchLocation();
     })();
   }, []);
 
+  useEffect(() => {
+    if (location) {
+      fetchNearbyRestaurants();
+    }
+  }, [location]);
+
+  // 태그 클릭 시
+  const handleTagPress = (tag) => {
+    if (!location) return;
+    navigation.navigate('SearchResultScreen', {
+      searchText: tag,
+      isTag: true,
+      lat: location.latitude,
+      lng: location.longitude,
+      district: address,
+    });
+  };
+
+  const renderItem = ({ item }) => (
+    <RestaurantCard restaurant={item} onPress={() => navigation.navigate('RestaurantDetailScreen', { restaurant: item })} />
+  );
+
   return (
     <Container>
-      <Header 
-        title="내돈내픽"  
-        canGoBack={false}
-        onBackPress={() => Alert.alert('뒤로가기 버튼 클릭')}
-        onMenuPress={() => setMenuVisible(true)}
-      /> 
+      <Header title="내돈내픽 🍽️" />
+      <LocationText>{address && `${address} 근처 맛집`}</LocationText>
+      <TagList onTagPress={handleTagPress} />
 
-      <SideMenuDrawer
-        isVisible={isMenuVisible}
-        onClose={() => setMenuVisible(false)}
-        onLoginPress={() => navigation.navigate('LoginMain')}
-      />
-
-      {/* 상단 이미지 + 설명 */}
-      <Banner source={{ uri: 'https://cdn.gimhaenews.co.kr/news/photo/201501/11563_17242_3954.jpg' }} />
-      <Description>
-        가격대와 선호 항목을 설정하고{'\n'}나에게 맞는 음식점을 추천 받아보세요....
-      </Description>
-
-      {/* 예산 + 위치 정보 */}
-      <InfoText>내 예산: 33,000원</InfoText>
-      <InfoText>내 위치: {address}</InfoText>
+      {loading ? (
+        <ActivityIndicator size="large" style={{ marginTop: 20 }} color="#007AFF" />
+      ) : (
+        <FlatList
+          data={restaurants}
+          keyExtractor={(item) => item.restaurantNo.toString()}
+          renderItem={renderItem}
+          contentContainerStyle={{ padding: 20 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+          }
+        />
+      )}
     </Container>
   );
 }
 
-const Container = styled(SafeAreaView)`
+const Container = styled.View`
   flex: 1;
   background-color: #fff;
-  padding: 20px;
 `;
 
-const Banner = styled.Image`
-  width: 100%;
-  height: 120px;
-  background-color: #e5e5e5;
-  margin-bottom: 16px;
-  border-radius: 12px;
-`;
-
-const Description = styled.Text`
-  text-align: center;
+const LocationText = styled.Text`
   font-size: 16px;
+  font-weight: 500;
+  margin: 12px 20px 4px;
   color: #333;
-  margin-bottom: 24px;
-  line-height: 24px;
-`;
-
-const InfoText = styled.Text`
-  font-size: 16px;
-  margin-bottom: 6px;
-  color: #555;
 `;
