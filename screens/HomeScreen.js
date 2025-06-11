@@ -1,116 +1,172 @@
-// screens/HomeScreen.js
-import React, { useEffect, useState, useCallback } from 'react';
-import { ActivityIndicator, Alert, FlatList, RefreshControl } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { FlatList, Alert, ActivityIndicator, RefreshControl, Dimensions } from 'react-native';
 import styled from 'styled-components/native';
 import * as Location from 'expo-location';
 import { useNavigation } from '@react-navigation/native';
+
 import Header from '../components/Header';
 import TagList from '../components/TagList';
-import RestaurantCard from '../components/RestaurantCard';
-import { getDistrictName } from '../utils/locationUtils';
+import RestaurantSearchBar from '../components/RestaurantSearchBar';
+import useLocationStore from '../store/locationStore';
+
+
+const screenWidth = Dimensions.get('window').width;
+const CARD_MARGIN = 12;
+const CARD_HORIZONTAL_PADDING = 16;
+const cardWidth = (screenWidth - CARD_HORIZONTAL_PADDING * 2 - CARD_MARGIN) / 2;
+const cardHeight = 140;
 
 export default function HomeScreen() {
-  const navigation = useNavigation();
-
   const [location, setLocation] = useState(null);
-  const [address, setAddress] = useState('');
+  const [district, setDistrict] = useState('');
+  const [regionForSearch, setRegionForSearch] = useState('');
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const navigation = useNavigation();
 
-  // 📍 위치 가져오기
-  const fetchLocation = useCallback(async () => {
+  const { setGlobalLocation, setGlobalDistrict } = useLocationStore();
+
+  useEffect(() => {
+    fetchLocationAndData();
+  }, []);
+
+  const fetchLocationAndData = async () => {
+    setLoading(true);
     try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        Alert.alert('위치 권한 거부됨', '앱 사용을 위해 위치 권한이 필요합니다.');
+        Alert.alert('위치 권한이 필요합니다', '앱을 사용하려면 위치 권한을 허용해주세요.');
         return;
       }
 
-      const loc = await Location.getCurrentPositionAsync({});
+      const loc = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High
+      });
       setLocation(loc.coords);
+      setGlobalLocation(loc.coords); // ✅ 전역 저장
 
-      const [addr] = await Location.reverseGeocodeAsync(loc.coords);
-      const district = getDistrictName(addr);
-      setAddress(district);
-    } catch (error) {
-      console.error('위치 정보 오류:', error);
-      Alert.alert('오류', '위치 정보를 가져오는 중 문제가 발생했습니다.');
-    }
-  }, []);
+      const addr = await Location.reverseGeocodeAsync(loc.coords);
+      const city = addr[0]?.city || '';
+      const districtName = addr[0]?.district || '';
+      const street = addr[0]?.street || addr[0]?.name || '';
+      const fullDistrict = `${city} ${districtName} ${street}`;
 
-  // 🍽️ 음식점 가져오기
-  const fetchNearbyRestaurants = useCallback(async () => {
-    if (!location) return;
+      setDistrict(fullDistrict);
+      setRegionForSearch(street);
+      setGlobalDistrict(fullDistrict); // ✅ 전역 저장
 
-    try {
-      const res = await fetch(
-        `http://192.168.25.6:8080/api/restaurant/nearby?lat=${location.latitude}&lng=${location.longitude}`
-      );
-      const data = await res.json();
-      setRestaurants(data);
+      fetchRestaurants(loc.coords);
     } catch (err) {
-      console.error('🍽️ 가까운 음식점 가져오기 오류:', err);
-      Alert.alert('오류', '음식점을 불러오는 중 문제가 발생했습니다.');
+      console.error('📍 위치 또는 음식점 로드 실패:', err);
+      Alert.alert('오류', '위치 또는 음식점 데이터를 불러오는 데 실패했습니다.');
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [location]);
-
-  // 🔁 새로고침
-  const handleRefresh = async () => {
-    setRefreshing(true);
-    await fetchLocation();
-    await fetchNearbyRestaurants();
   };
 
-  useEffect(() => {
-    (async () => {
-      await fetchLocation();
-    })();
-  }, []);
-
-  useEffect(() => {
-    if (location) {
-      fetchNearbyRestaurants();
+  const fetchRestaurants = async ({ latitude, longitude }) => {
+    try {
+      const res = await fetch(
+        `http://172.31.57.17:8080/api/restaurant/nearby?lat=${latitude}&lng=${longitude}&page=0&size=4`
+      );
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
+      setRestaurants(data.content ? data.content.slice(0, 4) : []);
+    } catch (err) {
+      console.error('🍽️ 가까운 음식점 가져오기 오류:', err);
     }
-  }, [location]);
+  };
 
-  // 태그 클릭 시
   const handleTagPress = (tag) => {
-    if (!location) return;
     navigation.navigate('SearchResultScreen', {
       searchText: tag,
       isTag: true,
-      lat: location.latitude,
-      lng: location.longitude,
-      district: address,
+      latitude: location?.latitude,
+      longitude: location?.longitude,
+      district: regionForSearch,
     });
   };
 
-  const renderItem = ({ item }) => (
-    <RestaurantCard restaurant={item} onPress={() => navigation.navigate('RestaurantDetailScreen', { restaurant: item })} />
+  const handleMore = () => {
+    navigation.navigate('NearbyListScreen', {
+      latitude: location?.latitude,
+      longitude: location?.longitude,
+    });
+  };
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchLocationAndData();
+  };
+
+  const renderRestaurant = ({ item }) => (
+    <Card onPress={() => navigation.navigate('RestaurantDetailScreen', { restaurant: item })}>
+      <CardContent>
+        <CardTitle>{item.name}</CardTitle>
+        <CardSub>{item.address}</CardSub>
+        <CardDistance>
+          거리:{' '}
+          {item.distance == null || item.distance >= 999999999999
+            ? '정보 없음'
+            : `${Math.round(item.distance)}m`}
+        </CardDistance>
+      </CardContent>
+    </Card>
   );
 
   return (
     <Container>
-      <Header title="내돈내픽 🍽️" />
-      <LocationText>{address && `${address} 근처 맛집`}</LocationText>
-      <TagList onTagPress={handleTagPress} />
+      <Header title="내돈내픽" />
 
-      {loading ? (
-        <ActivityIndicator size="large" style={{ marginTop: 20 }} color="#007AFF" />
-      ) : (
-        <FlatList
-          data={restaurants}
-          keyExtractor={(item) => item.restaurantNo.toString()}
-          renderItem={renderItem}
-          contentContainerStyle={{ padding: 20 }}
-          refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
-          }
-        />
+      <FlatList
+        ListHeaderComponent={
+          <>
+            <LocationBox>
+              <LocationLabel>📍 현재 위치 :</LocationLabel>
+              <LocationText>{district || '위치 불러오는 중...'}</LocationText>
+            </LocationBox>
+
+            <RestaurantSearchBar
+              onSearch={(text) =>
+                navigation.navigate('SearchResultScreen', {
+                  searchText: text,
+                  isTag: false,
+                  latitude: location?.latitude,
+                  longitude: location?.longitude,
+                })
+              }
+            />
+
+            <SectionTitle>{regionForSearch ? `${regionForSearch} 추천 태그` : '추천 태그'}</SectionTitle>
+            <TagList onTagPress={handleTagPress} />
+
+            <SectionTitle>가까운 음식점</SectionTitle>
+          </>
+        }
+        data={restaurants}
+        keyExtractor={(item) => item.restaurantNo.toString()}
+        renderItem={renderRestaurant}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+        numColumns={2}
+        columnWrapperStyle={{
+          justifyContent: 'space-between',
+          paddingHorizontal: CARD_HORIZONTAL_PADDING,
+        }}
+        ListFooterComponent={
+          restaurants.length > 0 && (
+            <MoreButton onPress={handleMore}>
+              <MoreText>더보기</MoreText>
+            </MoreButton>
+          )
+        }
+      />
+
+      {loading && (
+        <LoadingWrapper>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </LoadingWrapper>
       )}
     </Container>
   );
@@ -121,9 +177,87 @@ const Container = styled.View`
   background-color: #fff;
 `;
 
+const LocationBox = styled.View`
+  padding: 16px;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+`;
+
+const LocationLabel = styled.Text`
+  font-size: 16px;
+  color: #444;
+  font-weight: bold;
+  margin-right: 6px;
+`;
+
 const LocationText = styled.Text`
   font-size: 16px;
-  font-weight: 500;
-  margin: 12px 20px 4px;
-  color: #333;
+  color: #007AFF;
+`;
+
+const SectionTitle = styled.Text`
+  font-size: 20px;
+  font-weight: bold;
+  margin: 20px 16px 10px;
+`;
+
+const Card = styled.TouchableOpacity`
+  width: ${cardWidth}px;
+  height: ${cardHeight}px;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 16px;
+  elevation: 2;
+  shadow-color: #000;
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.1;
+  shadow-radius: 4px;
+`;
+
+const CardContent = styled.View`
+  flex: 1;
+  justify-content: space-between;
+`;
+
+const CardTitle = styled.Text`
+  font-size: 16px;
+  font-weight: bold;
+`;
+
+const CardSub = styled.Text`
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+`;
+
+const CardDistance = styled.Text`
+  font-size: 12px;
+  color: #888;
+  align-self: flex-end;
+`;
+
+const MoreButton = styled.TouchableOpacity`
+  padding: 14px;
+  align-items: center;
+  justify-content: center;
+  background-color: #eee;
+  margin: 10px 16px 30px;
+  border-radius: 10px;
+`;
+
+const MoreText = styled.Text`
+  font-size: 16px;
+  color: #007AFF;
+  font-weight: bold;
+`;
+
+const LoadingWrapper = styled.View`
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  align-items: center;
+  justify-content: center;
 `;

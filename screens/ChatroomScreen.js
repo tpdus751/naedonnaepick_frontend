@@ -27,7 +27,7 @@ export default function ChatRoomScreen() {
 
   useEffect(() => {
     // 채팅 내역 불러오기
-    axios.get(`http://192.168.25.6:8080/api/chat/history/${roomNo}`)
+    axios.get(`http://172.31.57.17:8080/api/chat/history/${roomNo}`)
       .then((response) => {
         const sortedMessages = response.data.sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at));
         setMessages(sortedMessages);
@@ -36,7 +36,7 @@ export default function ChatRoomScreen() {
 
     // 접속자 수 주기적으로 불러오기
     const fetchUserCount = () => {
-      axios.get(`http://192.168.25.6:8080/api/chat/room/${roomNo}/userCount`)
+      axios.get(`http://172.31.57.17:8080/api/chat/room/${roomNo}/userCount`)
         .then(res => setUserCount(res.data))
         .catch(err => console.error('접속자 수 불러오기 실패:', err));
     };
@@ -45,7 +45,7 @@ export default function ChatRoomScreen() {
     const interval = setInterval(fetchUserCount, 5000);
 
     // STOMP 연결
-    const socket = new SockJS('http://192.168.25.6:8080/ws');
+    const socket = new SockJS('http://172.31.57.17:8080/ws');
     const stompClient = new Client({
       webSocketFactory: () => socket,
       connectHeaders: {
@@ -63,7 +63,7 @@ export default function ChatRoomScreen() {
     setClient(stompClient);
 
     // 입장 알리기
-    axios.post(`http://192.168.25.6:8080/api/chat/enter`, {
+    axios.post(`http://172.31.57.17:8080/api/chat/enter`, {
       room_no: roomNo,
       email,
     });
@@ -72,7 +72,7 @@ export default function ChatRoomScreen() {
       clearInterval(interval);
       stompClient.deactivate();
 
-      axios.post(`http://192.168.25.6:8080/api/chat/leave`, {
+      axios.post(`http://172.31.57.17:8080/api/chat/leave`, {
         room_no: roomNo,
         email,
       });
@@ -217,7 +217,7 @@ export default function ChatRoomScreen() {
                   return;
                 }
                 setReportModalVisible(false);
-                axios.post('http://192.168.25.6:8080/api/chat/report', {
+                axios.post('http://172.31.57.17:8080/api/chat/report', {
                   reporter_email: email,
                   reported_email: reportTarget.email,
                   reason: finalReason,

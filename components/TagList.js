@@ -19,6 +19,7 @@ const ALL_TAGS = [
 ];
 
 export default function TagList({ onTagPress }) {
+  console.log("✅ TagList에서 받은 onTagPress:", typeof onTagPress);
   // 랜덤 6개 태그
   const randomTags = [...ALL_TAGS].sort(() => 0.5 - Math.random()).slice(0, 6);
 
