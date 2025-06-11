@@ -73,7 +73,7 @@ export default function SignUpScreen() {
     };
 
     try {
-      const res = await fetch('http://192.168.25.6:8080/api/users/register', {
+      const res = await fetch('http://172.31.57.17:8080/api/users/register', {
         // 에뮬레이터를 쓰고있으니까 10.0.2.2 로 로컬 호스트에 접근해야 됨
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
