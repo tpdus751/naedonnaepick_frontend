@@ -40,7 +40,7 @@ export default function NearbyListScreen() {
 
     try {
       const res = await fetch(
-        `http://172.31.57.17:8080/api/restaurant/nearby?lat=${latitude}&lng=${longitude}&page=${page}&size=10`
+        `http://172.31.57.31:8080/api/restaurant/nearby?lat=${latitude}&lng=${longitude}&page=${page}&size=10`
       );
 
       if (!res.ok) {

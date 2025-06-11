@@ -39,7 +39,7 @@ export default function SearchResultScreen() {
         ? `/api/restaurant/tag?tag=${searchText}&district=${district}&lat=${latitude}&lng=${longitude}&page=${page}&size=10`
         : `/api/restaurant/general?keyword=${searchText}&lat=${latitude}&lng=${longitude}&page=${page}&size=10`;
 
-      const res = await fetch(`http://172.31.57.17:8080${endpoint}`);
+      const res = await fetch(`http://172.31.57.31:8080${endpoint}`);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
 

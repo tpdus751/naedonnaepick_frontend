@@ -54,7 +54,7 @@ const RecommendationScreen = ({ navigation }) => {
     console.log('lat:', params.lat);
     console.log('lng:', params.lng);
 
-    const response = await axios.get('http://172.31.57.17:8080/api/restaurant/recommended', { params });
+    const response = await axios.get('http://172.31.57.31:8080/api/restaurant/recommended', { params });
     const filteredRestaurants = response.data;
 
     if (filteredRestaurants.length === 0) {

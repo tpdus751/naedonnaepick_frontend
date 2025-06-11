@@ -3,17 +3,19 @@ import { Alert, ActivityIndicator, TouchableOpacity, FlatList } from 'react-nati
 import axios from 'axios';
 import { useRoute } from '@react-navigation/native';
 import styled from 'styled-components/native';
+import useUserStore from '../store/userStore'; // zustand store import
 
 const RestaurantDetailScreen = () => {
   const route = useRoute();
   const { restaurant } = route.params;
+  const { user } = useUserStore(); // zustand에서 사용자 정보 가져오기
   const [menus, setMenus] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchMenus = async () => {
       try {
-        const response = await axios.get('http://172.31.57.17:8080/api/restaurant/menus', {
+        const response = await axios.get('http://172.31.57.31:8080/api/restaurant/menus', {
           params: { restaurantNo: restaurant.restaurantNo },
         });
         setMenus(response.data);
@@ -28,11 +30,51 @@ const RestaurantDetailScreen = () => {
     fetchMenus();
   }, [restaurant.restaurantNo]);
 
-  const handleEatButtonPress = (menuItem) => {
+  const handleEatButtonPress = async (menuItem) => {
+    if (!user || !user.email) {
+      Alert.alert('오류', '사용자 정보가 없습니다. 다시 로그인해 주세요.');
+      return;
+    }
+
+    // 현재 날짜를 yyyy-MM-dd 형식으로 생성
+    const currentDate = new Date().toISOString().split('T')[0];
+
+    // 사용자 확인 알림창
     Alert.alert(
-      '먹기 버튼 클릭',
-      `${restaurant.name}의 ${menuItem.menu}을(를) 선택하시겠습니까?`,
-      [{ text: '취소', style: 'cancel' }, { text: '확인' }]
+      '먹기 선택',
+      `${menuItem.menu}을(를) ${menuItem.price.toLocaleString()} 원에 선택하시겠습니까?`,
+      [
+        {
+          text: '취소',
+          style: 'cancel',
+        },
+        {
+          text: '확인',
+          onPress: async () => {
+            try {
+              const response = await axios.get('http://172.31.57.31:8080/api/budget/spend', {
+                params: {
+                  email: user.email, // zustand를 통해 가져온 사용자 이메일
+                  date: currentDate,
+                  spend: menuItem.price,
+                },
+              });
+              Alert.alert(
+                '결제 성공',
+                `${menuItem.menu}(${menuItem.price.toLocaleString()} 원)를 성공적으로 선택했습니다.\n남은 예산: ${response.data.totalBudget.toLocaleString()} 원`
+              );
+            } catch (error) {
+              console.error('예산 차감 오류:', error);
+              if (error.response) {
+                const errorMessage = error.response.data || '알 수 없는 오류가 발생했습니다.';
+                Alert.alert('오류', errorMessage);
+              } else {
+                Alert.alert('오류', '네트워크 오류가 발생했습니다.');
+              }
+            }
+          },
+        },
+      ]
     );
   };
 
