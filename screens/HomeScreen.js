@@ -1,68 +1,173 @@
-import React, { useState } from 'react';
-import { Alert, ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { FlatList, Alert, ActivityIndicator, RefreshControl, Dimensions } from 'react-native';
 import styled from 'styled-components/native';
+import * as Location from 'expo-location';
+import { useNavigation } from '@react-navigation/native';
+
 import Header from '../components/Header';
-import { useNavigation } from '@react-navigation/native'; 
-import SideMenuDrawer from '../components/SideMenuDrawer';
+import TagList from '../components/TagList';
 import RestaurantSearchBar from '../components/RestaurantSearchBar';
-import RestaurantList from '../components/RestaurantList';
+import useLocationStore from '../store/locationStore';
+
+
+const screenWidth = Dimensions.get('window').width;
+const CARD_MARGIN = 12;
+const CARD_HORIZONTAL_PADDING = 16;
+const cardWidth = (screenWidth - CARD_HORIZONTAL_PADDING * 2 - CARD_MARGIN) / 2;
+const cardHeight = 140;
 
 export default function HomeScreen() {
-  const [isMenuVisible, setMenuVisible] = useState(false);
-  const [restaurants, setRestaurants] = useState([]); // 검색된 음식점 리스트
+  const [location, setLocation] = useState(null);
+  const [district, setDistrict] = useState('');
+  const [regionForSearch, setRegionForSearch] = useState('');
+  const [restaurants, setRestaurants] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation();
 
-  // 음식점 검색 API 호출 핸들링
-  const handleSearch = (searchText) => {
-    fetch(`http://172.31.57.31:8080/api/restaurant/search?searchText=${searchText}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setRestaurants(data); // 검색된 결과를 상태로 저장
-      })
-      .catch((err) => {
-        Alert.alert('검색 오류', '검색 중 오류가 발생했습니다.');
-        console.error(err);
+  const { setGlobalLocation, setGlobalDistrict } = useLocationStore();
+
+  useEffect(() => {
+    fetchLocationAndData();
+  }, []);
+
+  const fetchLocationAndData = async () => {
+    setLoading(true);
+    try {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        Alert.alert('위치 권한이 필요합니다', '앱을 사용하려면 위치 권한을 허용해주세요.');
+        return;
+      }
+
+      const loc = await Location.getCurrentPositionAsync({
+        accuracy: Location.Accuracy.High
       });
+      setLocation(loc.coords);
+      setGlobalLocation(loc.coords); // ✅ 전역 저장
+
+      const addr = await Location.reverseGeocodeAsync(loc.coords);
+      const city = addr[0]?.city || '';
+      const districtName = addr[0]?.district || '';
+      const street = addr[0]?.street || addr[0]?.name || '';
+      const fullDistrict = `${city} ${districtName} ${street}`;
+
+      setDistrict(fullDistrict);
+      setRegionForSearch(street);
+      setGlobalDistrict(fullDistrict); // ✅ 전역 저장
+
+      fetchRestaurants(loc.coords);
+    } catch (err) {
+      console.error('📍 위치 또는 음식점 로드 실패:', err);
+      Alert.alert('오류', '위치 또는 음식점 데이터를 불러오는 데 실패했습니다.');
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
   };
+
+  const fetchRestaurants = async ({ latitude, longitude }) => {
+    try {
+      const res = await fetch(
+        `http://172.31.57.17:8080/api/restaurant/nearby?lat=${latitude}&lng=${longitude}&page=0&size=4`
+      );
+      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+      const data = await res.json();
+      setRestaurants(data.content ? data.content.slice(0, 4) : []);
+    } catch (err) {
+      console.error('🍽️ 가까운 음식점 가져오기 오류:', err);
+    }
+  };
+
+  const handleTagPress = (tag) => {
+    navigation.navigate('SearchResultScreen', {
+      searchText: tag,
+      isTag: true,
+      latitude: location?.latitude,
+      longitude: location?.longitude,
+      district: regionForSearch,
+    });
+  };
+
+  const handleMore = () => {
+    navigation.navigate('NearbyListScreen', {
+      latitude: location?.latitude,
+      longitude: location?.longitude,
+    });
+  };
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchLocationAndData();
+  };
+
+  const renderRestaurant = ({ item }) => (
+    <Card onPress={() => navigation.navigate('RestaurantDetailScreen', { restaurant: item })}>
+      <CardContent>
+        <CardTitle>{item.name}</CardTitle>
+        <CardSub>{item.address}</CardSub>
+        <CardDistance>
+          거리:{' '}
+          {item.distance == null || item.distance >= 999999999999
+            ? '정보 없음'
+            : `${Math.round(item.distance)}m`}
+        </CardDistance>
+      </CardContent>
+    </Card>
+  );
 
   return (
     <Container>
-      {/* 스크롤 가능한 영역 */}
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        stickyHeaderIndices={[1]} // 검색 바만 Sticky Header로 설정
-      >
-        {/* 고정되지 않는 Header와 기존 UI */}
-        <HeaderSection>
-          <Header 
-            title="내돈내픽"  
-            canGoBack={false}
-            onBackPress={() => Alert.alert('뒤로가기 버튼 클릭')}
-            onMenuPress={() => setMenuVisible(true)}
-          />
-          <SideMenuDrawer
-            isVisible={isMenuVisible}
-            onClose={() => setMenuVisible(false)}
-            onLoginPress={() => 
-              navigation.navigate('LoginMain')
-            }
-          />
-          <Banner source={{ uri: 'https://cdn.gimhaenews.co.kr/news/photo/201501/11563_17242_3954.jpg' }} />
-          <Description>
-            가격대와 선호 항목을 설정하고{'\n'}나에게 맞는 음식점을 추천 받아보세요....
-          </Description>
-          <InfoText>내 예산: 33,000원</InfoText>
-          {/* <InfoText>내 위치: 경기도 성남시 산성동</InfoText> */}
-        </HeaderSection>
+      <Header title="내돈내픽" />
 
-        {/* 검색 바 */}
-        <StickySearchBar>
-          <RestaurantSearchBar onSearch={handleSearch} />
-        </StickySearchBar>
+      <FlatList
+        ListHeaderComponent={
+          <>
+            <LocationBox>
+              <LocationLabel>📍 현재 위치 :</LocationLabel>
+              <LocationText>{district || '위치 불러오는 중...'}</LocationText>
+            </LocationBox>
 
-        {/* 음식점 리스트 */}
-        <RestaurantList restaurants={restaurants} />
-      </ScrollView>
+            <RestaurantSearchBar
+              onSearch={(text) =>
+                navigation.navigate('SearchResultScreen', {
+                  searchText: text,
+                  isTag: false,
+                  latitude: location?.latitude,
+                  longitude: location?.longitude,
+                })
+              }
+            />
+
+            <SectionTitle>{regionForSearch ? `${regionForSearch} 추천 태그` : '추천 태그'}</SectionTitle>
+            <TagList onTagPress={handleTagPress} />
+
+            <SectionTitle>가까운 음식점</SectionTitle>
+          </>
+        }
+        data={restaurants}
+        keyExtractor={(item) => item.restaurantNo.toString()}
+        renderItem={renderRestaurant}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />}
+        numColumns={2}
+        columnWrapperStyle={{
+          justifyContent: 'space-between',
+          paddingHorizontal: CARD_HORIZONTAL_PADDING,
+        }}
+        ListFooterComponent={
+          restaurants.length > 0 && (
+            <MoreButton onPress={handleMore}>
+              <MoreText>더보기</MoreText>
+            </MoreButton>
+          )
+        }
+      />
+
+      {loading && (
+        <LoadingWrapper>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </LoadingWrapper>
+      )}
     </Container>
   );
 }
@@ -72,37 +177,87 @@ const Container = styled.View`
   background-color: #fff;
 `;
 
-// 고정되지 않는 UI 구성 (기존 헤더, 배너 등)
-const HeaderSection = styled.View`
-  padding: 20px;
-`;
-
-// Sticky Header로 고정될 검색 바
-const StickySearchBar = styled.View`
-  background-color: #fff;
+const LocationBox = styled.View`
   padding: 16px;
-  border-bottom-width: 1px;
-  border-bottom-color: #ddd;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
 `;
- 
-const Banner = styled.Image`
-  width: 100%;
-  height: 120px;
-  background-color: #e5e5e5;
-  margin-bottom: 16px;
+
+const LocationLabel = styled.Text`
+  font-size: 16px;
+  color: #444;
+  font-weight: bold;
+  margin-right: 6px;
+`;
+
+const LocationText = styled.Text`
+  font-size: 16px;
+  color: #007AFF;
+`;
+
+const SectionTitle = styled.Text`
+  font-size: 20px;
+  font-weight: bold;
+  margin: 20px 16px 10px;
+`;
+
+const Card = styled.TouchableOpacity`
+  width: ${cardWidth}px;
+  height: ${cardHeight}px;
+  background-color: #f9f9f9;
   border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 16px;
+  elevation: 2;
+  shadow-color: #000;
+  shadow-offset: 0px 2px;
+  shadow-opacity: 0.1;
+  shadow-radius: 4px;
 `;
 
-const Description = styled.Text`
-  text-align: center;
-  font-size: 16px;
-  color: #333;
-  margin-bottom: 24px;
-  line-height: 24px;
+const CardContent = styled.View`
+  flex: 1;
+  justify-content: space-between;
 `;
 
-const InfoText = styled.Text`
+const CardTitle = styled.Text`
   font-size: 16px;
-  margin-bottom: 12px;
-  color: #555;
+  font-weight: bold;
+`;
+
+const CardSub = styled.Text`
+  font-size: 12px;
+  color: #666;
+  margin-top: 4px;
+`;
+
+const CardDistance = styled.Text`
+  font-size: 12px;
+  color: #888;
+  align-self: flex-end;
+`;
+
+const MoreButton = styled.TouchableOpacity`
+  padding: 14px;
+  align-items: center;
+  justify-content: center;
+  background-color: #eee;
+  margin: 10px 16px 30px;
+  border-radius: 10px;
+`;
+
+const MoreText = styled.Text`
+  font-size: 16px;
+  color: #007AFF;
+  font-weight: bold;
+`;
+
+const LoadingWrapper = styled.View`
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  align-items: center;
+  justify-content: center;
 `;
