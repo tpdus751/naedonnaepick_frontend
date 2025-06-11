@@ -52,7 +52,7 @@ export default function HomeScreen() {
             가격대와 선호 항목을 설정하고{'\n'}나에게 맞는 음식점을 추천 받아보세요....
           </Description>
           <InfoText>내 예산: 33,000원</InfoText>
-          <InfoText>내 위치: 경기도 성남시 산성동</InfoText>
+          {/* <InfoText>내 위치: 경기도 성남시 산성동</InfoText> */}
         </HeaderSection>
 
         {/* 검색 바 */}
