@@ -9,11 +9,12 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@babel/runtime": "^7.27.6",
     "@react-native-community/datetimepicker": "^8.3.0",
     "@react-native-community/slider": "^4.5.6",
     "@react-navigation/bottom-tabs": "^7.3.9",
     "@react-navigation/native": "^7.1.5",
-    "@react-navigation/native-stack": "^7.3.9",
+    "@react-navigation/native-stack": "^7.3.14",
     "@stomp/stompjs": "^7.1.1",
     "axios": "^1.9.0",
     "expo": "~52.0.46",
