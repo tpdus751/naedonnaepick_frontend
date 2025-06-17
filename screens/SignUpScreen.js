@@ -28,8 +28,8 @@ export default function SignUpScreen() {
 
   // 2단계: 선호도 점수
   const preferenceTags = [
-    '가성비','양 많음','친절함','청결함','분위기','혼밥 가능','맛집',
-    '트렌디함','주차 편의성','웨이팅 있음','신선함','매운맛','짭짤함','달콤함','고소함'
+    'valueForMoney','largePortions','kindness','cleanliness','atmosphere','soloDining','tasty',
+    'trendy','parking','waiting','freshness','spicy','salty','sweet','savory'
   ];
   const [preferences, setPreferences] = useState(
     preferenceTags.reduce((acc, tag) => ({ ...acc, [tag]: 3 }), {})
