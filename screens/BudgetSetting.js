@@ -7,6 +7,7 @@ import Header from '../components/Header';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import SideMenuDrawer from '../components/SideMenuDrawer';
+import useUserStore from '../store/userStore'; // ✅ Zustand import
 
 export default function BudgetSettingScreen() {
   const navigation = useNavigation();
@@ -16,6 +17,7 @@ export default function BudgetSettingScreen() {
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [budget, setBudget] = useState(100000);
+  const { user, logout } = useUserStore();
 
   const [isMenuVisible, setMenuVisible] = useState(false);
 
@@ -26,7 +28,8 @@ export default function BudgetSettingScreen() {
   // ✅ 서버로 데이터 전송 함수
   const submitBudget = async () => {
     try {
-      const response = await axios.post('http://<your-server-url>:<port>/api/budget/set', {
+      const response = await axios.post('http://172.31.57.17:8080/api/budget/set', {
+        email: user.email,
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
         totalBudget: budget,

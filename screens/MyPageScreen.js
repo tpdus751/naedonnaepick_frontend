@@ -3,21 +3,25 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView, ScrollView } from 'react-native';
 import styled from 'styled-components/native';
 import Header from '../components/Header';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import useUserStore from '../store/userStore'; // ✅ Zustand import
 
 export default function MyPageScreen() {
   const navigation = useNavigation();
-  const route = useRoute();
-
-  console.log('💡 MyPage route.params:', route.params); // ← 이걸로 params 출력!
-
-  const { first_name, last_name, nickname, email } = route.params || {};
+  const { user, logout } = useUserStore(); // ✅ user 정보와 로그아웃 함수
 
   const goToHome = () => {
-    // StackNavigator의 Main (탭 네비게이터)로 완전히 초기화 이동
     navigation.reset({
       index: 0,
       routes: [{ name: 'Main' }],
+    });
+  };
+
+  const handleLogout = () => {
+    logout(); // ✅ Zustand 상태 초기화
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'LoginMain' }], // 로그인 화면으로 이동
     });
   };
 
@@ -26,31 +30,31 @@ export default function MyPageScreen() {
       <Header
         title="내돈내픽"
         canGoBack={false}
-        onMenuPress={() => {/* 햄버거 메뉴 처리 */ }}
+        onMenuPress={() => { /* 햄버거 메뉴 처리 */ }}
       />
 
       <ScrollView contentContainerStyle={styles.inner}>
         <Card>
           <Text style={styles.infoText}>
-            이름: {first_name}{last_name}{'\n'}
-            닉네임: {nickname}{'\n'}
-            이메일: {email}
+            이름: {user?.last_name}{user?.first_name}{'\n'}
+            닉네임: {user?.nickname}{'\n'}
+            이메일: {user?.email}
           </Text>
         </Card>
 
-        <OptionButton onPress={() => {/* 프로필 정보 확인 */ }}>
+        <OptionButton onPress={() => { /* 프로필 정보 확인 */ }}>
           <OptionText>프로필 정보 확인</OptionText>
         </OptionButton>
-        <OptionButton onPress={() => {/* 비밀번호 변경 */ }}>
+        <OptionButton onPress={() => { /* 비밀번호 변경 */ }}>
           <OptionText>비밀번호 변경</OptionText>
         </OptionButton>
-        <OptionButton onPress={() => {/* 로그아웃 */ }}>
+        <OptionButton onPress={handleLogout}>
           <OptionText>로그아웃</OptionText>
         </OptionButton>
-        <OptionButton onPress={() => {/* 공지사항 */ }}>
+        <OptionButton onPress={() => { /* 공지사항 */ }}>
           <OptionText>공지사항</OptionText>
         </OptionButton>
-        <OptionButton onPress={() => {/* 앱 정보 */ }}>
+        <OptionButton onPress={() => { /* 앱 정보 */ }}>
           <OptionText>앱 정보</OptionText>
         </OptionButton>
 

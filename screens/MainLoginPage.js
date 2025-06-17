@@ -1,4 +1,3 @@
-// screens/MainLoginScreen.js
 import React, { useState } from 'react';
 import {
   View,
@@ -7,27 +6,25 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
-  SafeAreaView
+  SafeAreaView,
 } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import Header from '../components/Header';
-import SideMenuDrawer from '../components/SideMenuDrawer';
 import styled from 'styled-components/native';
+import useUserStore from '../store/userStore'; // ✅ Zustand import
 
 export default function LoginScreen() {
   const navigation = useNavigation();
   const route = useRoute();
 
-  // 입력 필드 상태
   const [emailInput, setEmailInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
-  // 로그인 완료 플래그
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // SignUpScreen에서 넘어온 "welcome" 파라미터
+  const setUser = useUserStore((state) => state.setUser);
+  const user = useUserStore((state) => state.user);
+
   const fromSignUp = route.params?.welcome === true;
-  // 실제 로그인 성공 혹은 회원가입 직후일 때 환영 문구
-  const isWelcome = isLoggedIn || fromSignUp;
+  const isWelcome = !!user || fromSignUp;
 
   const handleLogin = async () => {
     if (!emailInput || !passwordInput) {
@@ -36,8 +33,7 @@ export default function LoginScreen() {
     }
 
     try {
-      //const response = await fetch('http://10.0.2.2:8080/api/users/login', {
-      const response = await fetch('http://172.31.57.26:8080/api/users/login', {
+      const response = await fetch('http://172.31.57.17:8080/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -53,30 +49,13 @@ export default function LoginScreen() {
         throw new Error(errText || `HTTP ${response.status}`);
       }
 
-      const user = await response.json();
+      const userData = await response.json();
+      setUser(userData); // ✅ 상태 저장
 
-      // 로그인 성공 → 마이페이지로 사용자 정보 전달
+      // ✅ 단순히 Main 탭 루트로 reset
       navigation.reset({
         index: 0,
-        routes: [
-          {
-            name: 'Main',
-            state: {
-              routes: [
-                { name: '홈' }, // 탭 네비게이터 안의 다른 화면들도 포함 가능
-                {
-                  name: '마이페이지',
-                  params: {
-                    first_name: user.first_name,
-                    last_name: user.last_name,
-                    nickname: user.nickname,
-                    email: user.email,
-                  }
-                },
-              ],
-            },
-          },
-        ],
+        routes: [{ name: 'Main' }],
       });
     } catch (error) {
       console.error('로그인 실패', error);
@@ -84,14 +63,13 @@ export default function LoginScreen() {
     }
   };
 
-
   return (
     <Container>
       <Header
         title="내돈내픽"
         canGoBack={true}
         onBackPress={() => navigation.goBack()}
-        onMenuPress={() => { }}
+        onMenuPress={() => {}}
       />
 
       <View style={styles.container}>
@@ -238,3 +216,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
+  

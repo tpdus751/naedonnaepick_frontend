@@ -1,107 +1,152 @@
-import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet, Modal, ScrollView, SafeAreaView } from 'react-native';
-import Header from '../components/Header'; // 헤더 컴포넌트 임포트
+// BudgetScreen.js (소비내역 모달과 동일한 UI를 메인 화면에도 적용)
+
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  View, Text, FlatList, TouchableOpacity, StyleSheet,
+  Modal, ScrollView, SafeAreaView, Alert
+} from 'react-native';
+import axios from 'axios';
+import Header from '../components/Header';
 import SideMenuDrawer from '../components/SideMenuDrawer';
+import useUserStore from '../store/userStore';
+import { useFocusEffect } from '@react-navigation/native';
+import { MaterialIcons } from '@expo/vector-icons';
 
 export default function BudgetScreen({ navigation }) {
-  const [budgetInfo] = useState({
-    startDate: '2025-04-14',
-    endDate: '2025-04-20',
-    initialBudget: 130000,
-    remainingBudget: 15000,
-  });
-
-  // 거래내역이 많을 때 스크롤 확인용 더미 데이터
-  const [transactions] = useState([
-    { id: '1', date: '25-04-14', name: '스타벅스', amount: -10000 },
-    { id: '2', date: '25-04-14', name: '맥도날드', amount: -8000 },
-    { id: '3', date: '25-04-15', name: '편의점', amount: -3000 },
-    { id: '4', date: '25-04-16', name: '분식집', amount: -2000 },
-    { id: '5', date: '25-04-16', name: '카페', amount: -4000 },
-    { id: '6', date: '25-04-17', name: '편의점', amount: -3000 },
-    { id: '7', date: '25-04-18', name: '분식집', amount: -2000 },
-    { id: '8', date: '25-04-19', name: '카페', amount: -4000 },
-    { id: '9', date: '25-04-20', name: '편의점', amount: -3000 },
-  ]);
-
+  const { user } = useUserStore();
+  const [budgetInfo, setBudgetInfo] = useState(null);
+  const [transactions, setTransactions] = useState([]);
   const [showModal, setShowModal] = useState(false);
-
   const [isMenuVisible, setMenuVisible] = useState(false);
-  
+  const [refreshing, setRefreshing] = useState(false);
+
+  const isTodayWithinRange = (start, end) => {
+    const today = new Date().toISOString().slice(0, 10);
+    return today >= start.slice(0, 10) && today <= end.slice(0, 10);
+  };
+
+  const fetchBudgetData = async () => {
+    if (!user || !user.email) return;
+
+    try {
+      const response = await axios.post('http://172.31.57.17:8080/api/budget/all', {
+        email: user.email,
+      });
+
+      const allBudgets = response.data;
+      const todayBudgetData = allBudgets.find(b =>
+        isTodayWithinRange(b.budget.startDate, b.budget.endDate)
+      );
+
+      if (todayBudgetData) {
+        const b = todayBudgetData.budget;
+        const sList = todayBudgetData.spendingList;
+        const totalSpent = sList.reduce((sum, s) => sum + s.price, 0);
+        const originalBudget = b.totalBudget + totalSpent;
+
+        setBudgetInfo({
+          startDate: b.startDate.slice(0, 10),
+          endDate: b.endDate.slice(0, 10),
+          initialBudget: originalBudget,
+          remainingBudget: b.totalBudget,
+        });
+
+        setTransactions(
+          sList.map((s, idx) => ({
+            id: idx.toString(),
+            date: s.date.slice(0, 10),
+            name: `${s.restaurantName} - ${s.menu}`,
+            amount: -s.price,
+          }))
+        );
+      } else {
+        setBudgetInfo(null);
+        setTransactions([]);
+      }
+    } catch (error) {
+      console.error("\u274C 예산 요청 실패:", error.response?.data || error.message);
+      Alert.alert('오류', '예산 정보를 불러오는 데 실패했습니다.');
+    }
+  };
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchBudgetData();
+    setRefreshing(false);
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      handleRefresh();
+    }, [user])
+  );
 
   return (
     <SafeAreaView style={styles.safe}>
-      <Header
-        title="내돈내픽"
-        canGoBack={false}
-        onMenuPress={() => setMenuVisible(true)}
+      <Header title="내돈내픽" canGoBack={false} onMenuPress={() => setMenuVisible(true)} />
+      <SideMenuDrawer
+        isVisible={isMenuVisible}
+        onClose={() => setMenuVisible(false)}
+        onLoginPress={() => navigation.navigate('LoginMain')}
       />
 
-      <SideMenuDrawer
-              isVisible={isMenuVisible}
-              onClose={() => setMenuVisible(false)}
-              onLoginPress={() => 
-                navigation.navigate('LoginMain')
-              }
-            />
-
       <View style={styles.container}>
+        <Text style={styles.title}>💰 현재 예산 현황</Text>
+        {budgetInfo ? (
+          <View style={styles.budgetCard}>
+            <Text style={styles.period}>📅 {budgetInfo.startDate} ~ {budgetInfo.endDate}</Text>
+            <Text style={styles.budgetAmount}>총예산: {budgetInfo.initialBudget.toLocaleString()}원</Text>
+            <Text style={styles.budgetRemain}>남은금액: {budgetInfo.remainingBudget.toLocaleString()}원</Text>
+          </View>
+        ) : (
+          <Text style={styles.noBudget}>📌 오늘 날짜에 해당하는 예산이 없습니다.</Text>
+        )}
 
-        <Text style={styles.title}>현재예산</Text>
-        <Text style={styles.period}>
-          시작일: {budgetInfo.startDate} ~ 종료일: {budgetInfo.endDate}
-        </Text>
-        <Text style={styles.budgetInfo}>
-          설정금액: {budgetInfo.initialBudget.toLocaleString()}원  남은예산: {budgetInfo.remainingBudget.toLocaleString()}원
-        </Text>
-
-        {/* 거래내역 박스 (더 크게 & 스크롤) */}
         <View style={styles.transactionBox}>
-          <FlatList
-            data={transactions}
-            keyExtractor={item => item.id}
-            renderItem={({ item }) => (
-              <Text style={styles.transactionItem}>
-                {item.date} {item.name} {item.amount.toLocaleString()}원
-              </Text>
-            )}
-            style={{ flexGrow: 0 }}
-            contentContainerStyle={{ paddingBottom: 4 }}
-            showsVerticalScrollIndicator={true}
-            scrollEnabled={true}
-          />
-          <TouchableOpacity style={styles.moreBtn} onPress={() => setShowModal(true)}>
-            <Text style={styles.moreBtnText}>더보기</Text>
-          </TouchableOpacity>
+          <Text style={styles.sectionTitle}>📜 소비 내역</Text>
+          {transactions.length > 0 ? (
+            <>
+              {transactions.slice(0, 3).map(item => (
+                <View key={item.id} style={styles.transactionCard}>
+                  <Text style={styles.transactionLine}>📅 {item.date}</Text>
+                  <Text style={styles.transactionLine}>🍽️ {item.name}</Text>
+                  <Text style={styles.transactionPrice}>💸 {item.amount.toLocaleString()}원</Text>
+                </View>
+              ))}
+              <TouchableOpacity style={styles.moreBtn} onPress={() => setShowModal(true)}>
+                <Text style={styles.moreBtnText}>더보기</Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <Text style={styles.noTransactionText}>소비 내역이 없습니다.</Text>
+          )}
         </View>
 
-        {/* 버튼 영역(동일한 크기, 간격) */}
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={styles.actionBtn}
-            onPress={() => navigation.navigate('BudgetSetting')}
-            activeOpacity={0.8}
+            onPress={() => navigation.navigate(budgetInfo ? 'BudgetEdit' : 'BudgetSetting')}
           >
-            <Text style={styles.actionBtnText}>예산설정</Text>
+            <Text style={styles.actionBtnText}>{budgetInfo ? '예산수정' : '예산설정'}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={styles.actionBtn}
             onPress={() => navigation.navigate('BudgetDetail')}
-            activeOpacity={0.8}
           >
             <Text style={styles.actionBtnText}>과거기록</Text>
           </TouchableOpacity>
         </View>
 
-        {/* 거래내역 전체 모달 (스크롤 가능) */}
         <Modal visible={showModal} transparent animationType="fade">
           <View style={styles.modalBackground}>
             <View style={styles.modalContent}>
-              <ScrollView style={{ maxHeight: 350 }}>
+              <ScrollView style={{ maxHeight: 300, width: '100%' }}>
                 {transactions.map(item => (
-                  <Text key={item.id} style={styles.transactionItem}>
-                    {item.date} {item.name} {item.amount.toLocaleString()}원
-                  </Text>
+                  <View key={item.id} style={styles.transactionCard}>
+                    <Text style={styles.transactionLine}>📅 {item.date}</Text>
+                    <Text style={styles.transactionLine}>🍽️ {item.name}</Text>
+                    <Text style={styles.transactionPrice}>💸 {item.amount.toLocaleString()}원</Text>
+                  </View>
                 ))}
               </ScrollView>
               <TouchableOpacity style={styles.closeBtn} onPress={() => setShowModal(false)}>
@@ -116,117 +161,48 @@ export default function BudgetScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: '#fff',
+  safe: { flex: 1, backgroundColor: '#fafbfe' },
+  container: { flex: 1, paddingHorizontal: 24, paddingTop: 32 },
+  title: { fontSize: 24, fontWeight: '700', color: '#22315b', textAlign: 'center', marginBottom: 16 },
+  budgetCard: {
+    backgroundColor: '#ffffff', padding: 20, borderRadius: 16,
+    shadowColor: '#000', shadowOpacity: 0.05, shadowOffset: { width: 0, height: 3 }, elevation: 3,
+    marginBottom: 24,
   },
-  container: {
-    flex: 1,
-    paddingHorizontal: 24,
-    paddingTop: 40,
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    alignSelf: 'center',
-    color: '#222',
-  },
-  period: {
-    fontSize: 15,
-    color: '#444',
-    marginBottom: 3,
-    textAlign: 'center',
-  },
-  budgetInfo: {
-    fontSize: 15,
-    color: '#444',
-    marginBottom: 18,
-    textAlign: 'center',
-  },
+  period: { fontSize: 15, color: '#666', marginBottom: 8 },
+  budgetAmount: { fontSize: 18, fontWeight: '600', color: '#3e4a89' },
+  budgetRemain: { fontSize: 16, color: '#226666', marginTop: 4 },
+  noBudget: { fontSize: 16, color: '#999', textAlign: 'center', marginBottom: 20 },
+  sectionTitle: { fontSize: 17, fontWeight: '600', marginBottom: 10, color: '#333' },
   transactionBox: {
-    backgroundColor: '#f5f5f7',
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 32,
-    shadowColor: '#000',
-    shadowOpacity: 0.04,
-    shadowOffset: { width: 0, height: 2 },
-    shadowRadius: 4,
+    backgroundColor: '#fff', padding: 16, borderRadius: 14, marginBottom: 30,
+    shadowColor: '#000', shadowOpacity: 0.04, shadowOffset: { width: 0, height: 2 }, elevation: 2,
+  },
+  transactionCard: {
+    backgroundColor: '#fff', borderRadius: 10, padding: 10, marginBottom: 12,
+    borderWidth: 1, borderColor: '#ddd', width: '100%',
+    shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2,
     elevation: 2,
-    minHeight: 180,
-    maxHeight: 250, // 더 크게!
   },
-  transactionItem: {
-    fontSize: 15,
-    color: '#222',
-    marginVertical: 2,
-    letterSpacing: -0.5,
-  },
-  moreBtn: {
-    alignSelf: 'flex-end',
-    marginTop: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  moreBtnText: {
-    color: '#757575',
-    fontWeight: 'bold',
-    fontSize: 14,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 14,
-    marginTop: 4,
-  },
+  transactionLine: { fontSize: 15, color: '#333', marginBottom: 2 },
+  transactionPrice: { fontSize: 15, color: '#2b72e8', fontWeight: 'bold' },
+  moreBtn: { alignSelf: 'flex-end', marginTop: 10 },
+  moreBtnText: { color: '#5a5a5a', fontWeight: 'bold' },
+  buttonRow: { flexDirection: 'row', justifyContent: 'space-around', marginTop: 10 },
   actionBtn: {
-    backgroundColor: '#e0e4ef',
-    paddingVertical: 12,
-    paddingHorizontal: 36,
-    borderRadius: 8,
-    marginHorizontal: 2,
-    borderWidth: 1,
-    borderColor: '#bfc8e0',
-    shadowColor: '#000',
-    shadowOpacity: 0.03,
-    shadowOffset: { width: 0, height: 1 },
-    shadowRadius: 2,
-    elevation: 1,
-    minWidth: 120,
-    alignItems: 'center',
+    backgroundColor: '#dfe4f2', paddingVertical: 12, paddingHorizontal: 30, borderRadius: 10,
+    minWidth: 120, alignItems: 'center',
   },
-  actionBtnText: {
-    color: '#22315b',
-    fontSize: 16,
-    fontWeight: '600',
-    letterSpacing: -0.5,
-  },
+  actionBtnText: { color: '#22315b', fontSize: 16, fontWeight: '600' },
   modalBackground: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.15)',
-    justifyContent: 'center',
-    alignItems: 'center',
+    flex: 1, backgroundColor: 'rgba(0,0,0,0.2)', justifyContent: 'center', alignItems: 'center',
   },
   modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 24,
-    width: '80%',
-    maxHeight: '70%',
-    alignItems: 'center',
+    backgroundColor: '#fff', borderRadius: 16, padding: 24, width: '85%', alignItems: 'center',
   },
   closeBtn: {
-    marginTop: 18,
-    backgroundColor: '#e0e4ef',
-    paddingHorizontal: 24,
-    paddingVertical: 8,
-    borderRadius: 8,
+    marginTop: 20, backgroundColor: '#e0e4ef', paddingHorizontal: 24, paddingVertical: 10, borderRadius: 10,
   },
-  closeBtnText: {
-    color: '#22315b',
-    fontWeight: 'bold',
-    fontSize: 15,
-  },
+  closeBtnText: { color: '#22315b', fontWeight: 'bold', fontSize: 16 },
+  noTransactionText: { textAlign: 'center', color: '#999', fontSize: 15, marginTop: 12 },
 });
