@@ -5,10 +5,10 @@ import * as Location from 'expo-location';
 import { useNavigation } from '@react-navigation/native';
 
 import Header from '../components/Header';
+import SideMenuDrawer from '../components/SideMenuDrawer';
 import TagList from '../components/TagList';
 import RestaurantSearchBar from '../components/RestaurantSearchBar';
 import useLocationStore from '../store/locationStore';
-
 
 const screenWidth = Dimensions.get('window').width;
 const CARD_MARGIN = 12;
@@ -23,9 +23,10 @@ export default function HomeScreen() {
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const navigation = useNavigation();
+  const [isMenuVisible, setMenuVisible] = useState(false); // ✅ 메뉴 상태 추가
 
-  const { setGlobalLocation, setGlobalDistrict } = useLocationStore();
+  const navigation = useNavigation();
+  const { setGlobalLocation, setGlobalDistrict, setGlobalDistrictName } = useLocationStore(); 
 
   useEffect(() => {
     fetchLocationAndData();
@@ -40,11 +41,9 @@ export default function HomeScreen() {
         return;
       }
 
-      const loc = await Location.getCurrentPositionAsync({
-        accuracy: Location.Accuracy.High
-      });
+      const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
       setLocation(loc.coords);
-      setGlobalLocation(loc.coords); // ✅ 전역 저장
+      setGlobalLocation(loc.coords);
 
       const addr = await Location.reverseGeocodeAsync(loc.coords);
       const city = addr[0]?.city || '';
@@ -54,7 +53,8 @@ export default function HomeScreen() {
 
       setDistrict(fullDistrict);
       setRegionForSearch(street);
-      setGlobalDistrict(fullDistrict); // ✅ 전역 저장
+      setGlobalDistrictName(street); // ✅ 여기에 저장
+      setGlobalDistrict(fullDistrict);
 
       fetchRestaurants(loc.coords);
     } catch (err) {
@@ -69,7 +69,7 @@ export default function HomeScreen() {
   const fetchRestaurants = async ({ latitude, longitude }) => {
     try {
       const res = await fetch(
-        `http://172.31.57.17:8080/api/restaurant/nearby?lat=${latitude}&lng=${longitude}&page=0&size=4`
+        `http://192.168.25.24:8080/api/restaurant/nearby?lat=${latitude}&lng=${longitude}&page=0&size=4`
       );
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
@@ -118,7 +118,16 @@ export default function HomeScreen() {
 
   return (
     <Container>
-      <Header title="내돈내픽" />
+      <Header
+        title="내돈내픽"
+        canGoBack={false}
+        onMenuPress={() => setMenuVisible(true)} // ✅ 메뉴 열기 연결
+      />
+      <SideMenuDrawer
+        isVisible={isMenuVisible}
+        onClose={() => setMenuVisible(false)}
+        onLoginPress={() => navigation.navigate('LoginMain')}
+      />
 
       <FlatList
         ListHeaderComponent={
@@ -142,7 +151,9 @@ export default function HomeScreen() {
             <SectionTitle>{regionForSearch ? `${regionForSearch} 추천 태그` : '추천 태그'}</SectionTitle>
             <TagList onTagPress={handleTagPress} />
 
-            <SectionTitle>가까운 음식점</SectionTitle>
+            <SectionTitle>
+              <HighlightText>{regionForSearch}</HighlightText> 가까운 음식점
+            </SectionTitle>
           </>
         }
         data={restaurants}
@@ -260,4 +271,9 @@ const LoadingWrapper = styled.View`
   right: 0;
   align-items: center;
   justify-content: center;
+`;
+
+const HighlightText = styled.Text`
+  color: #34C759; /* 초록연두 (iOS 스타일) */
+  font-weight: bold;
 `;

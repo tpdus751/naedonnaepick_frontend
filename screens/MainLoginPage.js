@@ -21,6 +21,7 @@ export default function LoginScreen() {
   const [passwordInput, setPasswordInput] = useState('');
 
   const setUser = useUserStore((state) => state.setUser);
+  const setTags = useUserStore((state) => state.setTags);
   const user = useUserStore((state) => state.user);
 
   const fromSignUp = route.params?.welcome === true;
@@ -33,7 +34,7 @@ export default function LoginScreen() {
     }
 
     try {
-      const response = await fetch('http://172.31.57.17:8080/api/users/login', {
+      const response = await fetch('http://192.168.25.24:8080/api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -50,7 +51,8 @@ export default function LoginScreen() {
       }
 
       const userData = await response.json();
-      setUser(userData); // ✅ 상태 저장
+      setUser(userData.user);
+      setTags(userData.tags); // ✅ 상태 저장
 
       // ✅ 단순히 Main 탭 루트로 reset
       navigation.reset({

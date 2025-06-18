@@ -1,17 +1,20 @@
+// ✅ RecommendationScreen.js
 import React, { useState } from 'react';
-import { Alert, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
-import { SafeAreaView } from 'react-native';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView,
+         SafeAreaView, ActivityIndicator } from 'react-native';
 import styled from 'styled-components/native';
 import Header from '../components/Header';
 import axios from 'axios';
 import useLocationStore from '../store/locationStore';
+import useUserStore from '../store/userStore';
+import TagPreferenceSection from '../components/TagPreferenceSection';
 
 const regions = [
   '수정구', '중원구', '분당구',
   '신흥동', '태평동', '수진동', '산성동', '단대동',
   '금광동', '상대원동', '중앙동', '성남동', '하대원동',
   '정자동', '서현동', '이매동', '야탑동', '분당동',
-  '구미동', '수내동', '금곡동', '정자1동', '판교동'
+  '구미동', '수내동', '금곡동', '정자1동', '판교동',
 ];
 
 const RecommendationScreen = ({ navigation }) => {
@@ -19,132 +22,100 @@ const RecommendationScreen = ({ navigation }) => {
   const [maxPrice, setMaxPrice] = useState('20000');
   const [selectedRegion, setSelectedRegion] = useState('');
   const [useCurrentLocation, setUseCurrentLocation] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);       // ✅ 추가
 
-  const { globalLocation, globalDistrict } = useLocationStore();
+  const { globalLocation, globalDistrict, globalDistrictName } = useLocationStore();
+  const { user } = useUserStore();
+  const [tagScores, setTagScores] = useState(user?.tagScores || {});
 
   const handleSearch = async () => {
-  if (parseInt(minPrice) > parseInt(maxPrice)) {
-    Alert.alert('입력 오류', '가격 입력이 잘못되었습니다.');
-    return;
-  }
+    if (parseInt(minPrice) > parseInt(maxPrice)) {
+      Alert.alert('입력 오류', '가격 입력이 잘못되었습니다.');
+      return;
+    }
 
-  try {
-    const params = {
-      location: useCurrentLocation
-        ? globalDistrict?.replace('성남시 ', '')?.split(' ')?.[1] || ''
-        : selectedRegion,
+    const baseParams = {
+      tagScores,
       minPrice: parseInt(minPrice),
       maxPrice: parseInt(maxPrice),
     };
 
-    if (useCurrentLocation) {
-      if (globalLocation?.latitude && globalLocation?.longitude) {
-        params.lat = globalLocation.latitude;
-        params.lng = globalLocation.longitude;
-      } else {
-        Alert.alert('위치 오류', '현재 위치 정보를 가져올 수 없습니다.');
-        return;
-      }
-    }
+    const params = useCurrentLocation
+      ? { ...baseParams, lat: globalLocation?.latitude, lng: globalLocation?.longitude,
+          region: globalDistrictName }
+      : { ...baseParams, lat: globalLocation?.latitude, lng: globalLocation?.longitude,
+          region: selectedRegion };
 
-    console.log('[RecommendationScreen] 요청 파라미터:');
-    console.log('location:', params.location);
-    console.log('minPrice:', params.minPrice);
-    console.log('maxPrice:', params.maxPrice);
-    console.log('lat:', params.lat);
-    console.log('lng:', params.lng);
+    try {
+      setIsLoading(true);                                   // ✅ 시작
+      const endpoint = 'http://192.168.25.24:8080/api/restaurant/recommended/location';
+      const response = await axios.post(endpoint, params);
 
-    const response = await axios.get('http://172.31.57.31:8080/api/restaurant/recommended', { params });
-    const filteredRestaurants = response.data;
-
-    if (filteredRestaurants.length === 0) {
-      Alert.alert('검색 결과가 없습니다.');
-    } else {
-      navigation.navigate('SearchResultScreen', {
-        restaurants: filteredRestaurants,
+      navigation.navigate('RecommendedResultScreen', {
+        restaurants: response.data,
         latitude: globalLocation?.latitude || null,
         longitude: globalLocation?.longitude || null,
-        searchText: useCurrentLocation
-          ? globalDistrict?.replace('성남시 ', '')?.split(' ')?.[1] || ''
-          : selectedRegion,
-        isTag: false,
+        searchText: useCurrentLocation ? globalDistrict : selectedRegion,
       });
+    } catch (error) {
+      console.error('검색 오류:', error);
+      Alert.alert('검색 오류', '검색 중 문제가 발생했습니다.');
+    } finally {
+      setIsLoading(false);                                  // ✅ 종료
     }
-  } catch (error) {
-    console.error('검색 오류:', error);
-    Alert.alert('검색 오류', '검색 중 문제가 발생했습니다.');
-  }
-};
+  };
 
   return (
-    <Container>
+      <Container>
       <Header title="내돈내픽" canGoBack={false} />
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <KeyboardAvoidingView style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView contentContainerStyle={{ padding: 16 }}>
           <Title>음식점 추천</Title>
 
           <SectionTitle>가격대 설정</SectionTitle>
           <PriceInputRow>
-            <PriceInput
-              keyboardType="numeric"
-              value={minPrice}
-              placeholder="최소"
-              onChangeText={(text) => setMinPrice(text.replace(/[^0-9]/g, ''))}
-            />
+            <PriceInput value={minPrice} keyboardType="numeric" onChangeText={(t) => setMinPrice(t.replace(/[^0-9]/g, ''))} placeholder="최소 가격" />
             <Wave>~</Wave>
-            <PriceInput
-              keyboardType="numeric"
-              value={maxPrice}
-              placeholder="최대"
-              onChangeText={(text) => setMaxPrice(text.replace(/[^0-9]/g, ''))}
-            />
+            <PriceInput value={maxPrice} keyboardType="numeric" onChangeText={(t) => setMaxPrice(t.replace(/[^0-9]/g, ''))} placeholder="최대 가격" />
           </PriceInputRow>
-          {parseInt(maxPrice) < parseInt(minPrice) && (
-            <WarningText>최대 가격은 최소 가격보다 커야 합니다.</WarningText>
-          )}
 
           <SectionTitle>지역 선택</SectionTitle>
           <RegionTagRow>
-            <CurrentLocationButton onPress={() => {
-              setUseCurrentLocation(true);
-              setSelectedRegion('');
-            }} selected={useCurrentLocation}>
+            <CurrentLocationButton onPress={() => { setUseCurrentLocation(true); setSelectedRegion(''); }} selected={useCurrentLocation}>
               <TagText>📍 현재 위치로 검색하기</TagText>
             </CurrentLocationButton>
 
-            {regions.map(region => (
-              <TagButton
-                key={region}
-                onPress={() => {
-                  setSelectedRegion(region);
-                  setUseCurrentLocation(false);
-                }}
-                selected={selectedRegion === region}
-              >
+            {regions.map((region) => (
+              <TagButton key={region} onPress={() => { setSelectedRegion(region); setUseCurrentLocation(false); }} selected={selectedRegion === region}>
                 <TagText>{region}</TagText>
               </TagButton>
             ))}
           </RegionTagRow>
-
-          {useCurrentLocation && globalDistrict && (
-            <SelectedText>📍 선택된 위치: {globalDistrict}</SelectedText>
-          )}
-          {selectedRegion && !useCurrentLocation && (
-            <SelectedText>📍 선택된 지역: {selectedRegion}</SelectedText>
-          )}
+          <TagPreferenceSection tagScores={tagScores} setTagScores={setTagScores} />
 
           <SearchButton onPress={handleSearch}>
             <SearchButtonText>음식점 추천 검색</SearchButtonText>
           </SearchButton>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* ✅ 로딩 오버레이 */}
+      {isLoading && (
+        <LoadingOverlay>
+          <LoadingBox>
+            <ActivityIndicator size="large" />
+            <LoadingText>
+              사용자가 입력한 정보를 기반으로{'\n'}추천 음식점을 선정 중이에요…
+            </LoadingText>
+          </LoadingBox>
+        </LoadingOverlay>
+      )}
     </Container>
   );
 };
 
 export default RecommendationScreen;
-
-// ================= 스타일 =================
 
 const Container = styled(SafeAreaView)`
   flex: 1;
@@ -160,7 +131,14 @@ const Title = styled.Text`
 const SectionTitle = styled.Text`
   font-size: 18px;
   font-weight: bold;
+  margin-top: 24px;
   margin-bottom: 8px;
+`;
+
+const Description = styled.Text`
+  font-size: 14px;
+  color: #777;
+  margin-bottom: 12px;
 `;
 
 const PriceInputRow = styled.View`
@@ -183,12 +161,6 @@ const PriceInput = styled.TextInput`
 const Wave = styled.Text`
   font-size: 20px;
   color: #666;
-`;
-
-const WarningText = styled.Text`
-  color: red;
-  font-size: 13px;
-  margin-bottom: 10px;
 `;
 
 const RegionTagRow = styled.View`
@@ -215,15 +187,8 @@ const TagText = styled.Text`
   color: #333;
 `;
 
-const SelectedText = styled.Text`
-  margin-top: 10px;
-  text-align: center;
-  font-size: 15px;
-  color: #555;
-`;
-
 const SearchButton = styled.TouchableOpacity`
-  margin-top: 24px;
+  margin-top: 32px;
   background-color: #007AFF;
   padding: 14px;
   border-radius: 12px;
@@ -234,4 +199,36 @@ const SearchButtonText = styled.Text`
   color: white;
   font-size: 16px;
   font-weight: bold;
+`;
+
+// ✅ 로딩 오버레이 컴포넌트들 추가
+
+const LoadingOverlay = styled.View`
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.3);
+  justify-content: center;
+  align-items: center;
+`;
+
+const LoadingBox = styled.View`
+  width: 80%;
+  max-width: 280px;
+  padding: 24px 20px;
+  background-color: #fff;
+  border-radius: 20px;
+  elevation: 4;
+  shadow-opacity: 0.15;
+  shadow-radius: 10px;
+  shadow-color: #000;
+  shadow-offset: 0px 4px;
+  align-items: center;
+`;
+
+const LoadingText = styled.Text`
+  margin-top: 16px;
+  text-align: center;
+  font-size: 15px;
+  line-height: 22px;
+  color: #333;
 `;
