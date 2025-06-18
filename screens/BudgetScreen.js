@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
-  Modal, ScrollView, SafeAreaView, Alert
+  Modal, ScrollView, SafeAreaView, Alert, RefreshControl
 } from 'react-native';
 import axios from 'axios';
 import Header from '../components/Header';
@@ -26,48 +26,51 @@ export default function BudgetScreen({ navigation }) {
   };
 
   const fetchBudgetData = async () => {
-    if (!user || !user.email) return;
+  if (!user || !user.email) return;
 
-    try {
-      const response = await axios.post('http://172.31.57.17:8080/api/budget/all', {
+  try {
+    const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+    const response = await axios.get('http://192.168.25.24:8080/api/budget/current', {
+      params: {
         email: user.email,
-      });
+        date: today,
+      },
+    });
 
-      const allBudgets = response.data;
-      const todayBudgetData = allBudgets.find(b =>
-        isTodayWithinRange(b.budget.startDate, b.budget.endDate)
-      );
+    const b = response.data.budget;
+    const sList = response.data.spendingList;
 
-      if (todayBudgetData) {
-        const b = todayBudgetData.budget;
-        const sList = todayBudgetData.spendingList;
-        const totalSpent = sList.reduce((sum, s) => sum + s.price, 0);
-        const originalBudget = b.totalBudget + totalSpent;
+    const totalSpent = sList.reduce((sum, s) => sum + s.price, 0);
+    const originalBudget = b.totalBudget + totalSpent;
 
-        setBudgetInfo({
-          startDate: b.startDate.slice(0, 10),
-          endDate: b.endDate.slice(0, 10),
-          initialBudget: originalBudget,
-          remainingBudget: b.totalBudget,
-        });
+    setBudgetInfo({
+      startDate: b.startDate.slice(0, 10),
+      endDate: b.endDate.slice(0, 10),
+      initialBudget: originalBudget,
+      remainingBudget: b.totalBudget,
+    });
 
-        setTransactions(
-          sList.map((s, idx) => ({
-            id: idx.toString(),
-            date: s.date.slice(0, 10),
-            name: `${s.restaurantName} - ${s.menu}`,
-            amount: -s.price,
-          }))
-        );
-      } else {
-        setBudgetInfo(null);
-        setTransactions([]);
-      }
-    } catch (error) {
-      console.error("\u274C 예산 요청 실패:", error.response?.data || error.message);
+    setTransactions(
+      sList.map((s, idx) => ({
+        id: idx.toString(),
+        date: s.date.slice(0, 10),
+        name: `${s.restaurantName} - ${s.menu}`,
+        amount: -s.price,
+      }))
+    );
+  } catch (error) {
+    if (error.response?.status === 404) {
+      // 예산 없을 때 (예외 상황 대응)
+      setBudgetInfo(null);
+      setTransactions([]);
+    } else {
+      console.error("❌ 예산 요청 실패:", error.response?.data || error.message);
       Alert.alert('오류', '예산 정보를 불러오는 데 실패했습니다.');
     }
-  };
+  }
+};
+
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -90,7 +93,12 @@ export default function BudgetScreen({ navigation }) {
         onLoginPress={() => navigation.navigate('LoginMain')}
       />
 
-      <View style={styles.container}>
+      <ScrollView
+        contentContainerStyle={styles.container}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={handleRefresh} />
+        }
+      >
         <Text style={styles.title}>💰 현재 예산 현황</Text>
         {budgetInfo ? (
           <View style={styles.budgetCard}>
@@ -155,14 +163,19 @@ export default function BudgetScreen({ navigation }) {
             </View>
           </View>
         </Modal>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#fafbfe' },
-  container: { flex: 1, paddingHorizontal: 24, paddingTop: 32 },
+  container: {
+    flexGrow: 1,
+    paddingHorizontal: 24,
+    paddingTop: 32,
+    paddingBottom: 40, // 여유있게 추가
+  },
   title: { fontSize: 24, fontWeight: '700', color: '#22315b', textAlign: 'center', marginBottom: 16 },
   budgetCard: {
     backgroundColor: '#ffffff', padding: 20, borderRadius: 16,

@@ -14,6 +14,7 @@ import RestaurantDetailScreen from '../screens/RestaurantDetailScreen';
 import ChatroomScreen from '../screens/ChatroomScreen';
 import NearbyListScreen from '../screens/NearByListScreen';
 import SearchResultScreen from '../screens/SearchResultScreen';
+import RecommendedResultScreen from '../screens/RecommendedResultScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -42,6 +43,8 @@ export default function StackNavigator() {
       <Stack.Screen name="SearchResultScreen" component={SearchResultScreen} />
 
       <Stack.Screen name="NearbyListScreen" component={NearbyListScreen} />
+
+      <Stack.Screen name="RecommendedResultScreen" component={RecommendedResultScreen} />
       
     </Stack.Navigator>
   );
