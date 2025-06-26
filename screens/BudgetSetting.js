@@ -28,7 +28,7 @@ export default function BudgetSettingScreen() {
   // ✅ 서버로 데이터 전송 함수
   const submitBudget = async () => {
     try {
-      const response = await axios.post('http://192.168.25.24:8080/api/budget/set', {
+      const response = await axios.post('http://192.168.40.14:8080/api/budget/set', {
         email: user.email,
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),
