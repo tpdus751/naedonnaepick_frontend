@@ -8,6 +8,7 @@ import axios from 'axios';
 import useLocationStore from '../store/locationStore';
 import useUserStore from '../store/userStore';
 import TagPreferenceSection from '../components/TagPreferenceSection';
+import RotatingLoader from '../components/LoadingIndicator'; // ✅ 로딩 인디케이터 컴포넌트
 
 const regions = [
   '수정구', '중원구', '분당구',
@@ -48,7 +49,7 @@ const RecommendationScreen = ({ navigation }) => {
 
     try {
       setIsLoading(true);                                   // ✅ 시작
-      const endpoint = 'http://192.168.25.24:8080/api/restaurant/recommended/location';
+      const endpoint = 'http://192.168.40.14:8080/api/restaurant/recommended/location';
       const response = await axios.post(endpoint, params);
 
       navigation.navigate('RecommendedResultScreen', {
@@ -104,10 +105,7 @@ const RecommendationScreen = ({ navigation }) => {
       {isLoading && (
         <LoadingOverlay>
           <LoadingBox>
-            <ActivityIndicator size="large" />
-            <LoadingText>
-              사용자가 입력한 정보를 기반으로{'\n'}추천 음식점을 선정 중이에요…
-            </LoadingText>
+            <RotatingLoader /> {/* ✅ 커스텀 로더 적용 */}
           </LoadingBox>
         </LoadingOverlay>
       )}

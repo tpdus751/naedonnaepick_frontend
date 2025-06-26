@@ -69,7 +69,7 @@ export default function HomeScreen() {
   const fetchRestaurants = async ({ latitude, longitude }) => {
     try {
       const res = await fetch(
-        `http://192.168.25.24:8080/api/restaurant/nearby?lat=${latitude}&lng=${longitude}&page=0&size=4`
+        `http://192.168.40.14:8080/api/restaurant/nearby?lat=${latitude}&lng=${longitude}&page=0&size=4`
       );
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();

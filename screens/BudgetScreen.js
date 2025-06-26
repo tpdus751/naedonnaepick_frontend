@@ -31,7 +31,7 @@ export default function BudgetScreen({ navigation }) {
   try {
     const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
-    const response = await axios.get('http://192.168.25.24:8080/api/budget/current', {
+    const response = await axios.get('http://192.168.40.14:8080/api/budget/current', {
       params: {
         email: user.email,
         date: today,

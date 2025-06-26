@@ -15,7 +15,7 @@ const RestaurantDetailScreen = () => {
   useEffect(() => {
     const fetchMenus = async () => {
       try {
-        const response = await axios.get('http://192.168.25.24:8080/api/restaurant/menus', {
+        const response = await axios.get('http://192.168.40.14:8080/api/restaurant/menus', {
           params: { restaurantNo: restaurant.restaurantNo },
         });
         setMenus(response.data);
@@ -52,7 +52,7 @@ const RestaurantDetailScreen = () => {
         text: '확인',
         onPress: async () => {
           try {
-            const response = await axios.post('http://192.168.25.24:8080/api/budget/spend', {
+            const response = await axios.post('http://192.168.40.14:8080/api/budget/spend', {
               email: user.email,
               date: currentDate,
               spend: menuItem.price,
