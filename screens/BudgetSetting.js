@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import Slider from '@react-native-community/slider';
-import axios from 'axios';
+import api from '../services/api';
 import Header from '../components/Header';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -28,7 +28,7 @@ export default function BudgetSettingScreen() {
   // ✅ 서버로 데이터 전송 함수
   const submitBudget = async () => {
     try {
-      const response = await axios.post('http://192.168.40.14:8080/api/budget/set', {
+      const response = await api.post('api/budget/set', {
         email: user.email,
         startDate: startDate.toISOString(),
         endDate: endDate.toISOString(),

@@ -52,7 +52,7 @@ export default function RecommendedResultScreen({ route }) {
 
   return (
     <Container>
-      <Header title={`${searchText} 추천 결과`} canGoBack={true} />
+      <Header title={`${String(searchText ?? '')} 추천 결과`} canGoBack={true} />
       {restaurants.length === 0 ? (
         <EmptyText>추천 결과가 없습니다.</EmptyText>
       ) : (

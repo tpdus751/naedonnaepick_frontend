@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Alert, ActivityIndicator, TouchableOpacity, FlatList } from 'react-native';
-import axios from 'axios';
 import { useRoute } from '@react-navigation/native';
 import styled from 'styled-components/native';
 import useUserStore from '../store/userStore'; // zustand store import
+import api from '../services/api'; // API 호출을 위한 axios 인스턴스
 
 const RestaurantDetailScreen = () => {
   const route = useRoute();
@@ -15,7 +15,7 @@ const RestaurantDetailScreen = () => {
   useEffect(() => {
     const fetchMenus = async () => {
       try {
-        const response = await axios.get('http://192.168.40.14:8080/api/restaurant/menus', {
+        const response = await api.get('api/restaurant/menus', {
           params: { restaurantNo: restaurant.restaurantNo },
         });
         setMenus(response.data);
@@ -52,7 +52,7 @@ const RestaurantDetailScreen = () => {
         text: '확인',
         onPress: async () => {
           try {
-            const response = await axios.post('http://192.168.40.14:8080/api/budget/spend', {
+            const response = await api.post('api/budget/spend', {
               email: user.email,
               date: currentDate,
               spend: menuItem.price,

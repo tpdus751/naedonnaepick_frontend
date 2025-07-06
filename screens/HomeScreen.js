@@ -9,6 +9,8 @@ import SideMenuDrawer from '../components/SideMenuDrawer';
 import TagList from '../components/TagList';
 import RestaurantSearchBar from '../components/RestaurantSearchBar';
 import useLocationStore from '../store/locationStore';
+import { API_BASE_URL } from '../services/config';
+import { getRegionFromKakao } from '../utils/kakaoGeo';
 
 const screenWidth = Dimensions.get('window').width;
 const CARD_MARGIN = 12;
@@ -23,10 +25,10 @@ export default function HomeScreen() {
   const [restaurants, setRestaurants] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [isMenuVisible, setMenuVisible] = useState(false); // ✅ 메뉴 상태 추가
+  const [isMenuVisible, setMenuVisible] = useState(false);
 
   const navigation = useNavigation();
-  const { setGlobalLocation, setGlobalDistrict, setGlobalDistrictName } = useLocationStore(); 
+  const { setGlobalLocation, setGlobalDistrict, setGlobalDistrictName } = useLocationStore();
 
   useEffect(() => {
     fetchLocationAndData();
@@ -46,15 +48,16 @@ export default function HomeScreen() {
       setGlobalLocation(loc.coords);
 
       const addr = await Location.reverseGeocodeAsync(loc.coords);
-      const city = addr[0]?.city || '';
-      const districtName = addr[0]?.district || '';
-      const street = addr[0]?.street || addr[0]?.name || '';
-      const fullDistrict = `${city} ${districtName} ${street}`;
+      console.log('📍 주소 정보:', addr);
 
-      setDistrict(fullDistrict);
-      setRegionForSearch(street);
-      setGlobalDistrictName(street); // ✅ 여기에 저장
-      setGlobalDistrict(fullDistrict);
+      const { dongName, roadAddress } = await getRegionFromKakao(loc.coords.latitude, loc.coords.longitude);
+      console.log('🏷️ Kakao 행정동:', dongName);
+      console.log('📍 Kakao 도로명주소:', roadAddress);
+
+      setDistrict(roadAddress || ''); // 현재 위치 표시용
+      setRegionForSearch(dongName || ''); // 검색용 행정동
+      setGlobalDistrictName(dongName || '');
+      setGlobalDistrict(`${addr[0]?.city || ''} ${addr[0]?.district || ''} ${dongName || ''}`);
 
       fetchRestaurants(loc.coords);
     } catch (err) {
@@ -69,7 +72,7 @@ export default function HomeScreen() {
   const fetchRestaurants = async ({ latitude, longitude }) => {
     try {
       const res = await fetch(
-        `http://192.168.40.14:8080/api/restaurant/nearby?lat=${latitude}&lng=${longitude}&page=0&size=4`
+        API_BASE_URL + `api/restaurant/nearby?lat=${latitude}&lng=${longitude}&page=0&size=4`
       );
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
@@ -121,7 +124,7 @@ export default function HomeScreen() {
       <Header
         title="내돈내픽"
         canGoBack={false}
-        onMenuPress={() => setMenuVisible(true)} // ✅ 메뉴 열기 연결
+        onMenuPress={() => setMenuVisible(true)}
       />
       <SideMenuDrawer
         isVisible={isMenuVisible}
@@ -183,6 +186,7 @@ export default function HomeScreen() {
   );
 }
 
+// Styled Components
 const Container = styled.View`
   flex: 1;
   background-color: #fff;
@@ -274,6 +278,6 @@ const LoadingWrapper = styled.View`
 `;
 
 const HighlightText = styled.Text`
-  color: #34C759; /* 초록연두 (iOS 스타일) */
+  color: #34C759;
   font-weight: bold;
 `;

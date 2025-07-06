@@ -3,6 +3,7 @@ import { ActivityIndicator, FlatList, Alert, RefreshControl, Dimensions } from '
 import styled from 'styled-components/native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Header from '../components/Header';
+import { API_BASE_URL } from '../services/config'; // ✅ 주소 import
 
 const windowWidth = Dimensions.get('window').width;
 const OUTER_MARGIN = 16;      // 화면 양쪽 여백
@@ -40,7 +41,7 @@ export default function NearbyListScreen() {
 
     try {
       const res = await fetch(
-        `http://192.168.40.14:8080/api/restaurant/nearby?lat=${latitude}&lng=${longitude}&page=${page}&size=10`
+        API_BASE_URL + `api/restaurant/nearby?lat=${latitude}&lng=${longitude}&page=${page}&size=10`
       );
 
       if (!res.ok) {

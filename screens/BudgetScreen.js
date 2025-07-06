@@ -1,16 +1,15 @@
-// BudgetScreen.js (소비내역 모달과 동일한 UI를 메인 화면에도 적용)
+// BudgetScreen.js
 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, FlatList, TouchableOpacity, StyleSheet,
   Modal, ScrollView, SafeAreaView, Alert, RefreshControl
 } from 'react-native';
-import axios from 'axios';
+import api from '../services/api';
 import Header from '../components/Header';
 import SideMenuDrawer from '../components/SideMenuDrawer';
 import useUserStore from '../store/userStore';
 import { useFocusEffect } from '@react-navigation/native';
-import { MaterialIcons } from '@expo/vector-icons';
 
 export default function BudgetScreen({ navigation }) {
   const { user } = useUserStore();
@@ -20,57 +19,89 @@ export default function BudgetScreen({ navigation }) {
   const [isMenuVisible, setMenuVisible] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
 
-  const isTodayWithinRange = (start, end) => {
-    const today = new Date().toISOString().slice(0, 10);
-    return today >= start.slice(0, 10) && today <= end.slice(0, 10);
-  };
-
   const fetchBudgetData = async () => {
-  if (!user || !user.email) return;
+    if (!user || !user.email) return;
 
-  try {
-    const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    try {
+      const today = new Date(Date.now() + 9 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
-    const response = await axios.get('http://192.168.40.14:8080/api/budget/current', {
-      params: {
-        email: user.email,
-        date: today,
-      },
-    });
+      const response = await api.get('api/budget/current', {
+        params: {
+          email: user.email,
+          date: today,
+        },
+      });
 
-    const b = response.data.budget;
-    const sList = response.data.spendingList;
+      const b = response.data.budget;
+      console.log("📊 예산 정보:", b);
+      const sList = response.data.spendingList;
+      console.log("💸 소비 내역:", sList);
 
-    const totalSpent = sList.reduce((sum, s) => sum + s.price, 0);
-    const originalBudget = b.totalBudget + totalSpent;
+      // 일반 소비 내역만 더하기 (수정 - 추가/차감은 제외)
+      const totalSpent = sList.reduce((sum, s) => {
+        const isSystemGenerated = s.restaurantName === '수정';
+        const isAdditionOrSubtraction = isSystemGenerated && (s.menu === '추가' || s.menu === '차감');
+        return isAdditionOrSubtraction ? sum : sum + s.price;
+      }, 0);
 
-    setBudgetInfo({
-      startDate: b.startDate.slice(0, 10),
-      endDate: b.endDate.slice(0, 10),
-      initialBudget: originalBudget,
-      remainingBudget: b.totalBudget,
-    });
+// 초기 예산 = 남은 예산 + 일반 소비
+const originalBudget = b.totalBudget + totalSpent;
 
-    setTransactions(
-      sList.map((s, idx) => ({
-        id: idx.toString(),
-        date: s.date.slice(0, 10),
-        name: `${s.restaurantName} - ${s.menu}`,
-        amount: -s.price,
-      }))
-    );
-  } catch (error) {
-    if (error.response?.status === 404) {
-      // 예산 없을 때 (예외 상황 대응)
-      setBudgetInfo(null);
-      setTransactions([]);
-    } else {
-      console.error("❌ 예산 요청 실패:", error.response?.data || error.message);
-      Alert.alert('오류', '예산 정보를 불러오는 데 실패했습니다.');
+      // '추가' 및 '차감' 항목으로 남은 금액 보정
+      let adjustedRemaining = b.totalBudget;
+
+      sList.forEach(s => {
+        const isSystemGenerated = s.restaurantName === '수정';
+        if (isSystemGenerated && s.menu === '추가') {
+          adjustedRemaining += s.price;
+        } else if (isSystemGenerated && s.menu === '차감') {
+          adjustedRemaining -= s.price;
+        }
+      });
+
+      setBudgetInfo({
+        startDate: b.startDate.slice(0, 10),
+        endDate: b.endDate.slice(0, 10),
+        initialBudget: originalBudget,
+        remainingBudget: adjustedRemaining,
+        budgetNo: b.budgetNo,
+      });
+
+      setTransactions(
+        sList.map((s, idx) => {
+          const isSystemGenerated = s.restaurantName === '수정';
+          const isAddition = s.menu === '추가';
+          const isSubtraction = s.menu === '차감';
+
+          let signedPrice;
+
+          if (isSystemGenerated && isAddition) {
+            signedPrice = s.price; // 예산 증가
+          } else if (isSystemGenerated && isSubtraction) {
+            signedPrice = -s.price; // 예산 감소
+          } else {
+            signedPrice = -s.price; // 일반 소비는 음수로
+          }
+
+          return {
+            id: idx.toString(),
+            date: s.date.slice(0, 10),
+            name: `${s.restaurantName} - ${s.menu}`,
+            amount: signedPrice,
+          };
+        })
+      );
+
+    } catch (error) {
+      if (error.response?.status === 404) {
+        setBudgetInfo(null);
+        setTransactions([]);
+      } else {
+        console.error("❌ 예산 요청 실패:", error.response?.data || error.message);
+        Alert.alert('오류', '예산 정보를 불러오는 데 실패했습니다.');
+      }
     }
-  }
-};
-
+  };
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -103,8 +134,8 @@ export default function BudgetScreen({ navigation }) {
         {budgetInfo ? (
           <View style={styles.budgetCard}>
             <Text style={styles.period}>📅 {budgetInfo.startDate} ~ {budgetInfo.endDate}</Text>
-            <Text style={styles.budgetAmount}>총예산: {budgetInfo.initialBudget.toLocaleString()}원</Text>
-            <Text style={styles.budgetRemain}>남은금액: {budgetInfo.remainingBudget.toLocaleString()}원</Text>
+            <Text style={styles.budgetAmount}>초기 예산: {budgetInfo.initialBudget.toLocaleString()}원</Text>
+            <Text style={styles.budgetRemain}>남은 금액: {budgetInfo.remainingBudget.toLocaleString()}원</Text>
           </View>
         ) : (
           <Text style={styles.noBudget}>📌 오늘 날짜에 해당하는 예산이 없습니다.</Text>
@@ -133,10 +164,19 @@ export default function BudgetScreen({ navigation }) {
         <View style={styles.buttonRow}>
           <TouchableOpacity
             style={styles.actionBtn}
-            onPress={() => navigation.navigate(budgetInfo ? 'BudgetEdit' : 'BudgetSetting')}
+            onPress={() => navigation.navigate(
+              budgetInfo ? 'BudgetEditScreen' : 'BudgetSetting',
+              budgetInfo ? {
+                startDate: budgetInfo.startDate,
+                endDate: budgetInfo.endDate,
+                remainingBudget: budgetInfo.remainingBudget,
+                budgetNo: budgetInfo.budgetNo,
+              } : null
+            )}
           >
             <Text style={styles.actionBtnText}>{budgetInfo ? '예산수정' : '예산설정'}</Text>
           </TouchableOpacity>
+
           <TouchableOpacity
             style={styles.actionBtn}
             onPress={() => navigation.navigate('BudgetDetail')}
@@ -167,6 +207,7 @@ export default function BudgetScreen({ navigation }) {
     </SafeAreaView>
   );
 }
+
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#fafbfe' },
