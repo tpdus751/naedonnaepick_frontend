@@ -9,6 +9,7 @@ import useLocationStore from '../store/locationStore';
 import useUserStore from '../store/userStore';
 import TagPreferenceSection from '../components/TagPreferenceSection';
 import RotatingLoader from '../components/LoadingIndicator'; // ✅ 로딩 인디케이터 컴포넌트
+import { API_BASE_URL } from '../services/config'; // ✅ 주소 import
 
 const regions = [
   '수정구', '중원구', '분당구',
@@ -49,7 +50,7 @@ const RecommendationScreen = ({ navigation }) => {
 
     try {
       setIsLoading(true);                                   // ✅ 시작
-      const endpoint = 'http://192.168.40.14:8080/api/restaurant/recommended/location';
+      const endpoint = API_BASE_URL + 'api/restaurant/recommended/location';
       const response = await axios.post(endpoint, params);
 
       navigation.navigate('RecommendedResultScreen', {
@@ -77,7 +78,9 @@ const RecommendationScreen = ({ navigation }) => {
           <SectionTitle>가격대 설정</SectionTitle>
           <PriceInputRow>
             <PriceInput value={minPrice} keyboardType="numeric" onChangeText={(t) => setMinPrice(t.replace(/[^0-9]/g, ''))} placeholder="최소 가격" />
-            <Wave>~</Wave>
+            <Wave>
+              {'~'}
+            </Wave>
             <PriceInput value={maxPrice} keyboardType="numeric" onChangeText={(t) => setMaxPrice(t.replace(/[^0-9]/g, ''))} placeholder="최대 가격" />
           </PriceInputRow>
 
@@ -105,7 +108,7 @@ const RecommendationScreen = ({ navigation }) => {
       {isLoading && (
         <LoadingOverlay>
           <LoadingBox>
-            <RotatingLoader /> {/* ✅ 커스텀 로더 적용 */}
+            <RotatingLoader />
           </LoadingBox>
         </LoadingOverlay>
       )}

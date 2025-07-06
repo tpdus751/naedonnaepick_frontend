@@ -5,8 +5,10 @@ import SockJS from 'sockjs-client';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Header from '../components/Header';
 import SideMenuDrawer from '../components/SideMenuDrawer';
-import axios from 'axios';
+import { WS_BASE_URL } from '../services/config'; // ✅ 주소 import
+import api from '../services/api'; // ✅ 경로만 확인해 주세요
 import moment from 'moment';
+import useUserStore from '../store/userStore'; // ✅ 추가
 
 export default function ChatRoomScreen() {
   const route = useRoute();
@@ -14,8 +16,9 @@ export default function ChatRoomScreen() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [client, setClient] = useState(null);
-  const nickname = '지수1234';
-  const email = 'jisoo@naver.com';
+  const { user } = useUserStore();  // ✅ zustand에서 user 정보 불러오기
+  const nickname = user?.nickname || '익명';
+  const email = user?.email || '';
   const navigation = useNavigation();
   const [userCount, setUserCount] = useState(0);
 
@@ -29,7 +32,7 @@ export default function ChatRoomScreen() {
     console.log("🔌 ChatRoom mount:", roomNo, email);
     
     // 채팅 내역 불러오기
-    axios.get(`http://192.168.40.14:8080/api/chat/history/${roomNo}`)
+    api.get(`api/chat/history/${roomNo}`)
       .then((response) => {
         const sortedMessages = response.data.sort((a, b) => new Date(a.sent_at) - new Date(b.sent_at));
         setMessages(sortedMessages);
@@ -38,7 +41,7 @@ export default function ChatRoomScreen() {
 
     // 접속자 수 주기적으로 불러오기
     const fetchUserCount = () => {
-      axios.get(`http://192.168.40.14:8080/api/chat/room/${roomNo}/userCount`)
+      api.get(`api/chat/room/${roomNo}/userCount`)
         .then(res => setUserCount(res.data))
         .catch(err => console.error('접속자 수 불러오기 실패:', err));
     };
@@ -47,7 +50,7 @@ export default function ChatRoomScreen() {
     const interval = setInterval(fetchUserCount, 5000);
 
     // STOMP 연결
-    const socket = new SockJS('http://192.168.40.14:8080/ws');
+    const socket = new SockJS(WS_BASE_URL);
     const stompClient = new Client({
       webSocketFactory: () => socket,
       connectHeaders: {
@@ -68,7 +71,7 @@ export default function ChatRoomScreen() {
       clearInterval(interval);
       stompClient.deactivate();
 
-      axios.post(`http://192.168.40.14:8080/api/chat/leave`, {
+      api.post(`api/chat/leave`, {
         roomNo: roomNo,
         email: email,
       });
@@ -213,7 +216,7 @@ export default function ChatRoomScreen() {
                   return;
                 }
                 setReportModalVisible(false);
-                axios.post('http://192.168.40.14:8080/api/chat/report', {
+                api.post('api/chat/report', {
                   reporter_email: email,
                   reported_email: reportTarget.email,
                   reason: finalReason,

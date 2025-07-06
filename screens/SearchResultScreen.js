@@ -3,6 +3,7 @@ import { FlatList, ActivityIndicator, Alert, Dimensions } from 'react-native';
 import styled from 'styled-components/native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import Header from '../components/Header';
+import { API_BASE_URL } from '../services/config'; // API 주소 import
 
 const screenWidth = Dimensions.get('window').width;
 const CARD_MARGIN = 12;
@@ -36,10 +37,11 @@ export default function SearchResultScreen() {
 
     try {
       const endpoint = isTag
-        ? `/api/restaurant/tag?tag=${searchText}&district=${district}&lat=${latitude}&lng=${longitude}&page=${page}&size=10`
-        : `/api/restaurant/general?keyword=${searchText}&lat=${latitude}&lng=${longitude}&page=${page}&size=10`;
+        ? `api/restaurant/tag?tag=${searchText}&district=${district}&lat=${latitude}&lng=${longitude}&page=${page}&size=10`
+        : `api/restaurant/general?keyword=${searchText}&lat=${latitude}&lng=${longitude}&page=${page}&size=10`;
 
-      const res = await fetch(`http:/192.168.40.14:8080${endpoint}`);
+      const res = await fetch(API_BASE_URL + endpoint);
+      console.log(`Fetching restaurants from: ${API_BASE_URL}${endpoint}`);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
       const data = await res.json();
 

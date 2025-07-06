@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, SafeAreaView, TouchableOpacity, FlatList, Alert } from 'react-native';
 import styled from 'styled-components/native';
 import Header from '../components/Header';
-import axios from 'axios';
+import api from '../services/api'; // ✅ 경로만 확인해 주세요
 import { useNavigation } from '@react-navigation/native';
 import SideMenuDrawer from '../components/SideMenuDrawer';
 
@@ -15,7 +15,7 @@ export default function ChatroomScreen() {
 
   // 채팅방 목록 조회
   useEffect(() => {
-    axios.get('http://192.168.40.14:8080/api/chat/chatrooms')
+    api.get('api/chat/chatrooms')
       .then(response => {
         console.log('채팅방 목록:', response.data);  // ✅ 목록 출력 추가
         setChatRooms(response.data);
@@ -26,7 +26,7 @@ export default function ChatroomScreen() {
 
   // 채팅방 입장 요청
   const handleEnterRoom = (roomNo, title) => {
-    axios.post('http://192.168.40.14:8080/api/chat/enter', {
+    api.post('api/chat/enter', {
       roomNo: roomNo,
       email: 'jisoo@naver.com',  // 실제 사용자 아이디 적용
     })

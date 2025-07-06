@@ -12,6 +12,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import Header from '../components/Header';
 import styled from 'styled-components/native';
 import useUserStore from '../store/userStore'; // ✅ Zustand import
+import { API_BASE_URL } from '../services/config'; // ✅ 주소 import
 
 export default function LoginScreen() {
   const navigation = useNavigation();
@@ -34,7 +35,7 @@ export default function LoginScreen() {
     }
 
     try {
-      const response = await fetch('http://192.168.40.14:8080/api/users/login', {
+      const response = await fetch(API_BASE_URL + 'api/users/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
