@@ -78,5 +78,9 @@ https://github.com/user-attachments/assets/a43ef292-bfbc-45d7-bc27-a356dcb0f5f2
 ### 채팅방 입장, 실시간 채팅, 음식점 언급 채팅 감성 분석 후 긍정일 경우 자동 투표 및 시각화
 https://github.com/user-attachments/assets/d316f7b4-d342-43c6-831c-1ed3f53ea9cf
 
+## 마무리
+모델 학습 과정을 포함한 전체 과정에 대한 더욱 자세한 내용을 확인하시려면 PPT를 확인하세요.
+[내돈내픽_통합_PPT.pptx](https://github.com/user-attachments/files/21205853/_._PPT.pptx)
 
+채팅 감성 분석 모델 깃허브 링크 : https://github.com/tpdus751/restaurant_review_sentiment_analysis_model
 
