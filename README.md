@@ -20,6 +20,12 @@
 
 ## 기획 - 문서 작성
 
+### WBS 일정 관리
+<img width="1867" height="781" alt="image" src="https://github.com/user-attachments/assets/bbd57afb-a214-468c-850e-7adadffd8c71" />
+<img width="914" height="542" alt="image" src="https://github.com/user-attachments/assets/0d169054-2481-4ac9-a953-21e593a876de" />
+
+
+
 ### 요구사항 정의서 (SRS)
 <img width="1825" height="901" alt="image" src="https://github.com/user-attachments/assets/962b781a-e8ed-421f-968e-f7ce75cc86ce" />
 일부 이미지 캡쳐<br>
@@ -34,6 +40,8 @@ Monolithic 구조의 아키텍처<br>
 
 ### ERD
 <img width="1570" height="2212" alt="내돈내픽_ERD" src="https://github.com/user-attachments/assets/c625ecdf-82d4-4660-aadb-4b4d27e3cdb9" />
+
+### 
 
 
 ### 기술 스택
