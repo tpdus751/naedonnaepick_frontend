@@ -1,4 +1,4 @@
-# Naedonnaepick 통합 Readme
+# 내돈내픽 통합 Readme
 
 ## "내돈내픽"
 내돈내픽은 내 돈으로 내가 픽(선택)한다. 라는 의미로 이름을 지었습니다.
@@ -17,6 +17,8 @@
 | **이지수** | 팀원   | - 음식점 정보 조회/추천/검색 기능 구현<br>                                                                           |
 | **전가람** | 팀원   | - 회원가입 및 로그인, 마이페이지 기능 구현<br>                                                                    |
 
+## 프로젝트 전체 소요 기간
+2025-04 ~ 2025-07
 
 ## 내돈내픽 주요 기능
 - 가격, 위치, 취향(15가지 취향에 대한 점수)기반 음식점 추천
@@ -62,5 +64,10 @@ Monolithic 구조의 아키텍처<br>
 <img width="1570" height="2212" alt="내돈내픽_ERD" src="https://github.com/user-attachments/assets/c625ecdf-82d4-4660-aadb-4b4d27e3cdb9" />
 
 
-## 공공 데이터
+## 시연 영상
+
+### 회원가입, 로그인, 로그아웃, 마이페이지
+https://github.com/user-attachments/assets/63f28a2e-865a-4e58-8b71-6b8a33410ed4
+
+
 
