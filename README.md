@@ -32,6 +32,10 @@
 <img width="1883" height="727" alt="내돈내픽_아키텍처" src="https://github.com/user-attachments/assets/0e6f837f-1065-498c-af75-413bcc9b0265" />
 Monolithic 구조의 아키텍처<br>
 
+### ERD
+<img width="1570" height="2212" alt="내돈내픽_ERD" src="https://github.com/user-attachments/assets/c625ecdf-82d4-4660-aadb-4b4d27e3cdb9" />
+
+
 ### 기술 스택
 | 영역           | 사용 기술                           | 설명                             |
 | ------------ | ------------------------------- | ------------------------------ |
