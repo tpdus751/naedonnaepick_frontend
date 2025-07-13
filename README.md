@@ -22,4 +22,5 @@
 
 ### 요구사항 정의서 (SRS)
 <img width="1825" height="901" alt="image" src="https://github.com/user-attachments/assets/962b781a-e8ed-421f-968e-f7ce75cc86ce" />
+일부 이미지 캡쳐
 [내돈내픽_요구사항 명세서.xlsx](https://github.com/user-attachments/files/21205589/_.xlsx)
