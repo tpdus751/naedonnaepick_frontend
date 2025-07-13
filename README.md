@@ -23,7 +23,7 @@
 ### WBS 일정 관리
 <img width="1867" height="781" alt="image" src="https://github.com/user-attachments/assets/bbd57afb-a214-468c-850e-7adadffd8c71" />
 <img width="914" height="542" alt="image" src="https://github.com/user-attachments/assets/0d169054-2481-4ac9-a953-21e593a876de" />
-
+[내돈내픽_WBS.xlsx](https://github.com/user-attachments/files/21205635/_WBS.xlsx)
 
 
 ### 요구사항 정의서 (SRS)
