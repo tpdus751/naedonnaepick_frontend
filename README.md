@@ -24,3 +24,12 @@
 <img width="1825" height="901" alt="image" src="https://github.com/user-attachments/assets/962b781a-e8ed-421f-968e-f7ce75cc86ce" />
 일부 이미지 캡쳐<br>
 [내돈내픽_요구사항 명세서.xlsx](https://github.com/user-attachments/files/21205589/_.xlsx)
+
+### 유스케이스 다이어그램
+![내돈내픽_유스케이스](https://github.com/user-attachments/assets/67d43e91-a1f6-45aa-ba31-5b301f9af457)
+
+### 아키텍처 - 논리 레벨
+<img width="1883" height="727" alt="내돈내픽_아키텍처" src="https://github.com/user-attachments/assets/0e6f837f-1065-498c-af75-413bcc9b0265" />
+Monolithic 구조의 아키텍처<br>
+
+
