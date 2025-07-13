@@ -69,5 +69,14 @@ Monolithic 구조의 아키텍처<br>
 ### 회원가입, 로그인, 로그아웃, 마이페이지
 https://github.com/user-attachments/assets/63f28a2e-865a-4e58-8b71-6b8a33410ed4
 
+### 음식점 추천, 조회, 검색, 먹기 버튼 클릭, 근처 음식점 조회
+https://github.com/user-attachments/assets/ab35a409-17b1-40b7-8625-466e74066041
+
+### 예산 설정, 확인, 수정, 과거 내역 확인
+https://github.com/user-attachments/assets/a43ef292-bfbc-45d7-bc27-a356dcb0f5f2
+
+### 채팅방 입장, 실시간 채팅, 음식점 언급 채팅 감성 분석 후 긍정일 경우 자동 투표 및 시각화
+https://github.com/user-attachments/assets/d316f7b4-d342-43c6-831c-1ed3f53ea9cf
+
 
 
