@@ -33,7 +33,7 @@
 | 영역           | 사용 기술                           | 설명                             |
 | ------------ | ------------------------------- | ------------------------------ |
 | **Frontend** | `React Native`, `Expo`          | 크로스 플랫폼 모바일 앱 개발 (Android)     |
-| **Backend**  | `Spring Boot`, `REST API`       | 사용자 관리, 음식점/예산/채팅 기능 제공 API 서버 |
+| **Backend**  | `Spring Boot`, `REST API`, `JPA`       | 사용자 관리, 음식점/예산/채팅 기능 제공 API 서버 |
 | **DB**       | `AWS RDS`, `MySQL`              | 클라우드 기반 관계형 데이터베이스 운영          |
 | **AI 모델**    | `Flask API Server`              | 머신러닝 기반 음식점 추천 및 감성 분석 API 제공  |
 |  • 추천 모델     | `Random Forest`                 | 사용자 취향 점수 기반 음식점 추천            |
